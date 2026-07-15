@@ -3,195 +3,191 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tracker Lucu & Chat</title>
+    <title>Life360 Cute Clone - Full Features</title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        /* === RESET & BACKGROUND PASTEL === */
+        /* === TEMA PASTEL & ANIMASI === */
         body { 
-            font-family: 'Nunito', sans-serif; 
-            margin: 0; padding: 0; 
+            font-family: 'Nunito', sans-serif; margin: 0; padding: 0; 
             display: flex; justify-content: center; align-items: center; min-height: 100vh;
-            /* Background gradasi pastel pink ke peach */
             background: linear-gradient(135deg, #ffc3a0 0%, #ffafbd 100%);
-            overflow-x: hidden;
         }
-
-        /* === KOTAK KACA (GLASSMORPHISM) === */
         .container { 
-            background: rgba(255, 255, 255, 0.85); 
-            backdrop-filter: blur(10px);
-            padding: 40px 30px; 
-            border-radius: 30px; 
+            background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px);
+            padding: 30px 20px; border-radius: 30px; 
             box-shadow: 0 15px 35px rgba(255, 105, 135, 0.2); 
-            width: 100%; max-width: 380px; 
-            text-align: center;
+            width: 90%; max-width: 450px; text-align: center;
             border: 2px solid rgba(255,255,255,0.8);
-            /* Animasi saat kotak muncul */
-            animation: popIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            box-sizing: border-box;
         }
-
-        /* === ELEMEN TEKS === */
-        h2 { 
-            color: #ff758c; 
-            font-weight: 800; 
-            font-size: 28px;
-            margin-top: 0;
-            margin-bottom: 25px;
-            /* Animasi melayang untuk judul */
-            animation: float 3s ease-in-out infinite;
+        h2, h3 { color: #ff758c; font-weight: 800; margin-top: 0; }
+        .form-group { margin-bottom: 15px; text-align: left; }
+        .form-group label { display: block; margin-bottom: 5px; color: #ff9a9e; font-weight: 600; font-size: 14px; }
+        .form-group input, .form-group select { 
+            width: 100%; padding: 12px; border: 2px solid #ffe2e6; 
+            border-radius: 15px; box-sizing: border-box; font-family: 'Nunito', sans-serif;
+            font-size: 14px; background: #fffafa; transition: all 0.3s ease;
         }
-        .icon-header { font-size: 40px; margin-bottom: -10px; }
-
-        /* === GAYA INPUT FORM === */
-        .form-group { margin-bottom: 18px; text-align: left; }
-        .form-group label { display: block; margin-bottom: 8px; color: #ff9a9e; font-weight: 600; font-size: 14px; padding-left: 5px; }
-        .form-group input { 
-            width: 100%; padding: 14px 15px; 
-            border: 2px solid #ffe2e6; 
-            border-radius: 15px; 
-            box-sizing: border-box; 
-            font-family: 'Nunito', sans-serif;
-            font-size: 15px;
-            background: #fffafa;
-            transition: all 0.3s ease;
+        .form-group input:focus, .form-group select:focus { 
+            outline: none; border-color: #ff758c; background: #fff;
         }
-        /* Animasi saat form diklik (fokus) */
-        .form-group input:focus {
-            outline: none;
-            border-color: #ff758c;
-            box-shadow: 0 0 10px rgba(255, 117, 140, 0.3);
-            background: #ffffff;
-        }
-
-        /* === GAYA TOMBOL LUCU === */
         button { 
-            width: 100%; padding: 15px; 
-            background: linear-gradient(to right, #ff758c, #ff7eb3); 
-            color: white; border: none; border-radius: 20px; 
-            cursor: pointer; font-size: 18px; font-weight: 800; 
-            font-family: 'Nunito', sans-serif;
-            box-shadow: 0 5px 15px rgba(255, 117, 140, 0.4);
-            transition: all 0.2s ease;
-            margin-top: 10px;
+            width: 100%; padding: 14px; background: linear-gradient(to right, #ff758c, #ff7eb3); 
+            color: white; border: none; border-radius: 20px; cursor: pointer; 
+            font-size: 16px; font-weight: 800; font-family: 'Nunito', sans-serif;
+            box-shadow: 0 5px 15px rgba(255, 117, 140, 0.3); transition: all 0.2s ease;
         }
-        /* Efek bouncy saat tombol disentuh kursor */
-        button:hover { 
-            transform: translateY(-3px) scale(1.02); 
-            box-shadow: 0 8px 20px rgba(255, 117, 140, 0.6); 
-        }
-        button:active { transform: translateY(2px) scale(0.98); } /* Efek tertekan */
-
-        .btn-danger { background: linear-gradient(to right, #ff9a9e, #fecfef); color: #d6336c; box-shadow: 0 5px 15px rgba(254, 207, 239, 0.6); }
-
-        .toggle-link { text-align: center; margin-top: 20px; font-size: 14px; font-weight: 600; color: #ff758c; cursor: pointer; transition: color 0.3s; }
-        .toggle-link:hover { color: #ff4766; text-decoration: underline; }
-        
+        button:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(255, 117, 140, 0.5); }
+        button:active { transform: translateY(1px); }
+        .toggle-link { margin-top: 15px; font-size: 14px; color: #ff758c; cursor: pointer; font-weight: 600; }
         .hidden { display: none !important; }
-        
-        /* === DEFINISI ANIMASI (KEYFRAMES) === */
-        @keyframes popIn {
-            0% { transform: scale(0.8) translateY(50px); opacity: 0; }
-            100% { transform: scale(1) translateY(0); opacity: 1; }
-        }
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-8px); }
-            100% { transform: translateY(0px); }
-        }
 
-        #dashboard-section { max-width: 500px; }
-        .nav-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px dashed #ffe2e6; padding-bottom: 15px; }
-        .nav-bar h3 { color: #ff758c; margin: 0; font-weight: 800; }
+        /* === DASHBOARD & TABS === */
+        #dashboard-section { max-width: 600px; width: 95%; }
+        .nav-bar { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px dashed #ffe2e6; padding-bottom: 10px; margin-bottom: 15px; }
+        .tabs { display: flex; justify-content: space-around; margin-bottom: 15px; background: #ffe2e6; padding: 5px; border-radius: 15px; }
+        .tab-btn { background: none; color: #ff758c; box-shadow: none; padding: 8px 12px; font-size: 14px; border-radius: 10px; width: 30%; }
+        .tab-btn.active { background: white; color: #ff758c; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .tab-content { display: none; text-align: left; }
+        .tab-content.active { display: block; }
+
+        /* === PETA === */
+        #map { height: 350px; width: 100%; border-radius: 20px; border: 3px solid #ffe2e6; margin-top: 10px; }
+
+        /* === DAFTAR USER & CHAT === */
+        .list-container { max-height: 200px; overflow-y: auto; margin-top: 10px; }
+        .item-card { background: white; padding: 10px 15px; border-radius: 15px; margin-bottom: 8px; border: 1px solid #ffe2e6; display: flex; justify-content: space-between; align-items: center; }
+        .badge { padding: 3px 8px; border-radius: 10px; font-size: 11px; color: white; font-weight: 800; }
+        .badge.Keluarga { background: #ff758c; }
+        .badge.Teman { background: #4a90e2; }
+        
+        #chat-box { height: 250px; overflow-y: auto; background: #fffafa; border: 2px solid #ffe2e6; border-radius: 20px; padding: 15px; margin-bottom: 10px; display: flex; flex-direction: column; }
+        .msg { margin-bottom: 10px; padding: 8px 12px; border-radius: 15px; max-width: 70%; font-size: 14px; line-height: 1.4; }
+        .msg.sent { background: #ff758c; color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
+        .msg.received { background: #e9ecef; color: #333; align-self: flex-start; border-bottom-left-radius: 2px; }
+
+        @keyframes popIn { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
     </style>
 </head>
 <body>
 
     <div id="login-section" class="container">
-        <div class="icon-header">📍🐾</div>
-        <h2>Masuk Yuk!</h2>
-        <div class="form-group">
-            <label>Email Kamu</label>
-            <input type="email" id="login-email" placeholder="contoh@email.com">
-        </div>
-        <div class="form-group">
-            <label>Password rahasia 🤫</label>
-            <input type="password" id="login-password" placeholder="••••••••">
-        </div>
-        <button id="btn-login">Login Sekarang</button>
-        <div class="toggle-link" id="go-to-register">Belum punya akun? Buat di sini ✨</div>
+        <h2>📍 Masuk Aplikasi</h2>
+        <div class="form-group"><label>Email</label><input type="email" id="login-email" placeholder="email@kamu.com"></div>
+        <div class="form-group"><label>Password</label><input type="password" id="login-password" placeholder="••••••••"></div>
+        <button id="btn-login">Login ✨</button>
+        <div class="toggle-link" id="go-to-register">Belum punya akun? Daftar di sini 🚀</div>
     </div>
 
     <div id="register-section" class="container hidden">
-        <div class="icon-header">✨🚀</div>
-        <h2>Buat Akun Baru</h2>
-        <div class="form-group">
-            <label>Nama Panggilan / Lengkap</label>
-            <input type="text" id="reg-name" placeholder="Siapa namamu?">
-        </div>
-        <div class="form-group">
-            <label>Username Unik</label>
-            <input type="text" id="reg-username" placeholder="@username">
-        </div>
-        <div class="form-group">
-            <label>No. WhatsApp / HP</label>
-            <input type="tel" id="reg-phone" placeholder="08xxxxxxxxxx">
-        </div>
-        <div class="form-group">
-            <label>Email</label>
-            <input type="email" id="reg-email" placeholder="Email aktif ya!">
-        </div>
-        <div class="form-group">
-            <label>Password Rahasia</label>
-            <input type="password" id="reg-password" placeholder="Minimal 6 huruf/angka">
-        </div>
-        <button id="btn-register">Ayo Gabung!</button>
-        <div class="toggle-link" id="go-to-login">Sudah punya akun? Masuk aja 🚪</div>
+        <h2>✨ Daftar Akun Baru</h2>
+        <div class="form-group"><label>Nama Lengkap</label><input type="text" id="reg-name" placeholder="Nama Lengkap"></div>
+        <div class="form-group"><label>Username</label><input type="text" id="reg-username" placeholder="Username"></div>
+        <div class="form-group"><label>No. Telepon / WA</label><input type="tel" id="reg-phone" placeholder="08xxxxxxxxxx"></div>
+        <div class="form-group"><label>Email</label><input type="email" id="reg-email" placeholder="email@aktif.com"></div>
+        <div class="form-group"><label>Password</label><input type="password" id="reg-password" placeholder="Minimal 6 karakter"></div>
+        <button id="btn-register">Gabung Sekarang! 🎉</button>
+        <div class="toggle-link" id="go-to-login">Sudah punya akun? Login 🚪</div>
     </div>
 
     <div id="dashboard-section" class="container hidden">
         <div class="nav-bar">
-            <h3>Hai, <span id="user-display-name">Loading...</span>! 👋</h3>
-            <button id="btn-logout" class="btn-danger" style="width: auto; padding: 10px 20px; font-size: 14px; margin-top:0;">Keluar</button>
+            <h3>Hi, <span id="user-display-name">...</span>! 👋</h3>
+            <button id="btn-logout" style="width:auto; padding:5px 15px; background:#ff9a9e; font-size:12px;">Keluar</button>
         </div>
-        <div style="font-size: 60px; margin: 20px 0; animation: float 3s ease-in-out infinite;">🗺️</div>
-        <p style="color: #666; font-weight: 600; line-height: 1.6;">
-            Yay! Kamu berhasil masuk.<br>
-            Peta imut dan obrolan seru teman-temanmu akan muncul di sini pada tahap selanjutnya! ✨
-        </p>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('tab-peta')">🗺️ Peta</button>
+            <button class="tab-btn" onclick="switchTab('tab-anggota')">👥 Anggota</button>
+            <button class="tab-btn" onclick="switchTab('tab-chat')">💬 Obrolan</button>
+        </div>
+
+        <div id="tab-peta" class="tab-content active">
+            <h4 style="margin:5px 0; color:#ff758c;">Lokasi Real-Time Keluarga & Teman</h4>
+            <div id="map"></div>
+        </div>
+
+        <div id="tab-anggota" class="tab-content">
+            <h4 style="margin:5px 0; color:#ff758c;">Tambah Anggota Baru</h4>
+            <div class="form-group"><label>Nama Panggilan Anggota</label><input type="text" id="friend-name" placeholder="Nama panggilan"></div>
+            <div class="form-group"><label>No. Telepon Terdaftar</label><input type="tel" id="friend-phone" placeholder="08xxxxxxxxxx"></div>
+            <div class="form-group">
+                <label>Kategori</label>
+                <select id="friend-category">
+                    <option value="Keluarga">👪 Keluarga</option>
+                    <option value="Teman">🎈 Teman</option>
+                </select>
+            </div>
+            <button id="btn-add-friend" style="padding:10px;">Tambahkan Anggota ➕</button>
+            
+            <h4 style="margin:20px 0 5px 0; color:#ff758c;">Daftar Anggota Dipantau</h4>
+            <div id="friend-list" class="list-container"></div>
+        </div>
+
+        <div id="tab-chat" class="tab-content">
+            <div class="form-group">
+                <label>Pilih Teman Chat:</label>
+                <select id="chat-select-user"><option value="">-- Pilih Anggota --</option></select>
+            </div>
+            <div id="chat-box"></div>
+            <div style="display:flex; gap:10px;">
+                <input type="text" id="chat-input" placeholder="Ketik pesan manis di sini..." style="flex:1; padding:10px; border-radius:15px; border:2px solid #ffe2e6;">
+                <button id="btn-send-chat" style="width:auto; padding:10px 20px;">Kirim 🚀</button>
+            </div>
+        </div>
     </div>
 
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, query, where, getDocs, onSnapshot, addDoc, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         // ==========================================
-        // GANTI DENGAN CONFIG FIREBASE KAMU
+        // PASTE / GANTI CONFIG FIREBASE KAMU DI SINI
         // ==========================================
         const firebaseConfig = {
-  apiKey: "AIzaSyCkCS0wpcYdO7T80wDyorl6dKxvKW50Y3c",
-  authDomain: "caz-location.firebaseapp.com",
-  databaseURL: "https://caz-location-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "caz-location",
-  storageBucket: "caz-location.firebasestorage.app",
-  messagingSenderId: "221858254329",
-  appId: "1:221858254329:web:73d2ea93ddb566199d0128"
-};
+            apiKey: "API_KEY_KAMU",
+            authDomain: "PROJECT_ID.firebaseapp.com",
+            projectId: "PROJECT_ID",
+            storageBucket: "PROJECT_ID.appspot.com",
+            messagingSenderId: "SENDER_ID",
+            appId: "APP_ID"
+        };
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        // State Global Aplikasi
+        let currentUserData = null;
+        let mapData = null;
+        let myMarker = null;
+        let friendMarkers = {};
+        let activeChatFriendId = null;
+        let unsubscribeChat = null;
+
+        // Navigasi Tab Internal
+        window.switchTab = function(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
+            if(tabId === 'tab-peta' && mapData) {
+                setTimeout(() => { mapData.invalidateSize(); }, 200);
+            }
+        }
+
+        // --- SISTEM AUTENTIKASI ---
         const loginSec = document.getElementById('login-section');
         const registerSec = document.getElementById('register-section');
         const dashboardSec = document.getElementById('dashboard-section');
-        const userNameDisplay = document.getElementById('user-display-name');
 
-        // Navigasi UI
         document.getElementById('go-to-register').onclick = () => { loginSec.classList.add('hidden'); registerSec.classList.remove('hidden'); };
         document.getElementById('go-to-login').onclick = () => { registerSec.classList.add('hidden'); loginSec.classList.remove('hidden'); };
 
-        // Registrasi
         document.getElementById('btn-register').onclick = async () => {
             const name = document.getElementById('reg-name').value;
             const username = document.getElementById('reg-username').value;
@@ -199,66 +195,184 @@
             const email = document.getElementById('reg-email').value;
             const password = document.getElementById('reg-password').value;
 
-            if(!name || !username || !phone || !email || !password) return alert("Ups! Tolong isi semua datanya ya! 🥺");
+            if(!name || !username || !phone || !email || !password) return alert("Isi semua data ya! 🥺");
 
             try {
-                // Tombol loading effect (Opsional)
-                const btn = document.getElementById('btn-register');
-                btn.innerText = "Tunggu sebentar... ⏳";
-                
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
-
-                await setDoc(doc(db, "users", user.uid), {
-                    nama: name, username: username, no_telp: phone, email: email, uid: user.uid
+                const cred = await createUserWithEmailAndPassword(auth, email, password);
+                await setDoc(doc(db, "users", cred.user.uid), {
+                    nama: name, username: username, no_telp: phone, email: email, uid: cred.user.uid
                 });
-
-                alert("Hore! Akun berhasil dibuat! 🎉");
-                btn.innerText = "Ayo Gabung!";
-            } catch (error) {
-                alert("Yah gagal: " + error.message);
-                document.getElementById('btn-register').innerText = "Ayo Gabung!";
-            }
+                alert("Pendaftaran Berhasil! 🎉");
+            } catch(e) { alert(e.message); }
         };
 
-        // Login
         document.getElementById('btn-login').onclick = async () => {
             const email = document.getElementById('login-email').value;
             const password = document.getElementById('login-password').value;
-            
-            const btn = document.getElementById('btn-login');
-            btn.innerText = "Membuka pintu... 🚪";
+            try { await signInWithEmailAndPassword(auth, email, password); } 
+            catch(e) { alert("Login gagal, periksa akun kembali!"); }
+        };
 
-            try {
-                await signInWithEmailAndPassword(auth, email, password);
-                btn.innerText = "Login Sekarang";
-            } catch (error) {
-                alert("Login gagal! Pastikan email dan passwordnya benar ya. 🕵️‍♂️");
-                btn.innerText = "Login Sekarang";
+        document.getElementById('btn-logout').onclick = () => { signOut(auth); location.reload(); };
+
+        // --- CORE LOGIC SETELAH LOGIN ---
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                loginSec.classList.add('hidden'); registerSec.classList.add('hidden');
+                dashboardSec.classList.remove('hidden');
+
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                if(userDoc.exists()) {
+                    currentUserData = userDoc.data();
+                    document.getElementById('user-display-name').innerText = currentUserData.nama;
+                    
+                    initMap();
+                    startLocationTracking();
+                    listenToFriendsListAndLocations();
+                }
+            } else {
+                loginSec.classList.remove('hidden'); dashboardSec.classList.add('hidden');
+            }
+        });
+
+        // --- SISTEM PETA (LEAFLET) ---
+        function initMap() {
+            if(!mapData) {
+                mapData = L.map('map').setView([-6.2088, 106.8456], 13);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(mapData);
+            }
+        }
+
+        function startLocationTracking() {
+            if('geolocation' in navigator) {
+                navigator.geolocation.watchPosition(async (pos) => {
+                    const lat = pos.coords.latitude;
+                    const lng = pos.coords.longitude;
+                    
+                    if (myMarker) { myMarker.setLatLng([lat, lng]); } 
+                    else { myMarker = L.marker([lat, lng]).addTo(mapData).bindPopup("<b>Saya (Kamu)</b>").openPopup(); mapData.setView([lat, lng], 15); }
+
+                    // Upload lokasi ke Firestore khusus koleksi penjejak lokasi
+                    await setDoc(doc(db, "locations", auth.currentUser.uid), {
+                        nama: currentUserData.nama, lat: lat, lng: lng, last_update: Date.now()
+                    });
+                }, (err) => console.log(err), { enableHighAccuracy: true });
+            }
+        }
+
+        // --- LOGIKA HUBUNGAN & PELACAKAN TEMAN ---
+        document.getElementById('btn-add-friend').onclick = async () => {
+            const fName = document.getElementById('friend-name').value;
+            const fPhone = document.getElementById('friend-phone').value;
+            const fCat = document.getElementById('friend-category').value;
+
+            if(!fName || !fPhone) return alert("Lengkapi data anggota yang ingin dicari!");
+
+            // Cari user di database berdasarkan No Telepon
+            const q = query(collection(db, "users"), where("no_telp", "==", fPhone));
+            const querySnap = await getDocs(q);
+
+            if(querySnap.empty) {
+                alert("Nomor telepon tidak ditemukan! Pastikan anggota sudah mendaftar aplikasi ini.");
+            } else {
+                const foundUser = querySnap.docs[0].data();
+                if(foundUser.uid === auth.currentUser.uid) return alert("Tidak bisa menambahkan diri sendiri!");
+                
+                // Simpan ke daftar kontak kita di Firestore
+                await setDoc(doc(db, "users", auth.currentUser.uid, "contacts", foundUser.uid), {
+                    uid: foundUser.uid, nama: fName, no_telp: fPhone, kategori: fCat
+                });
+                alert(`Berhasil menambahkan ${fName} sebagai ${fCat}! ✨`);
+                document.getElementById('friend-name').value = "";
+                document.getElementById('friend-phone').value = "";
             }
         };
 
-        // Logout
-        document.getElementById('btn-logout').onclick = () => { signOut(auth); };
+        function listenToFriendsListAndLocations() {
+            const contactsRef = collection(db, "users", auth.currentUser.uid, "contacts");
+            onSnapshot(contactsRef, (snapshot) => {
+                const friendListDiv = document.getElementById('friend-list');
+                const chatSelect = document.getElementById('chat-select-user');
+                
+                friendListDiv.innerHTML = "";
+                chatSelect.innerHTML = '<option value="">-- Pilih Anggota --</option>';
 
-        // Pantau Status User
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                loginSec.classList.add('hidden');
-                registerSec.classList.add('hidden');
-                dashboardSec.classList.remove('hidden');
+                if(snapshot.empty) friendListDiv.innerHTML = "<p style='color:#aaa;'>Belum ada anggota yang ditambahkan.</p>";
 
-                const docRef = doc(db, "users", user.uid);
-                const docSnap = await getDoc(docRef);
-                if (docSnap.exists()) {
-                    userNameDisplay.innerText = docSnap.data().nama;
-                }
-            } else {
-                loginSec.classList.remove('hidden');
-                registerSec.classList.add('hidden');
-                dashboardSec.classList.add('hidden');
-            }
-        });
+                snapshot.forEach((contactDoc) => {
+                    const friend = contactDoc.data();
+                    
+                    // Render List Anggota
+                    const card = document.createElement('div');
+                    card.className = "item-card";
+                    card.innerHTML = `<div><b>${friend.nama}</b><br><small>${friend.no_telp}</small></div>
+                                      <span class="badge ${friend.kategori}">${friend.kategori}</span>`;
+                    friendListDiv.appendChild(card);
+
+                    // Render Dropdown Pilihan Chat
+                    const opt = document.createElement('option');
+                    opt.value = friend.uid; opt.innerText = `[${friend.kategori}] ${friend.nama}`;
+                    chatSelect.appendChild(opt);
+
+                    // Dengarkan Perubahan Posisi GPS Anggota ini
+                    onSnapshot(doc(db, "locations", friend.uid), (locDoc) => {
+                        if(locDoc.exists()) {
+                            const loc = locDoc.data();
+                            if(friendMarkers[friend.uid]) {
+                                friendMarkers[friend.uid].setLatLng([loc.lat, loc.lng]);
+                            } else {
+                                friendMarkers[friend.uid] = L.marker([loc.lat, loc.lng]).addTo(mapData)
+                                    .bindPopup(`<b>${friend.nama}</b><br>Kategori: ${friend.kategori}`);
+                            }
+                        }
+                    });
+                });
+            });
+        }
+
+        // --- SISTEM REAL-TIME CHAT ---
+        document.getElementById('chat-select-user').onchange = (e) => {
+            activeChatFriendId = e.target.value;
+            loadChatRoom();
+        };
+
+        function loadChatRoom() {
+            if(unsubscribeChat) unsubscribeChat();
+            const chatBox = document.getElementById('chat-box');
+            chatBox.innerHTML = "";
+
+            if(!activeChatFriendId) return;
+
+            // Membuat Room ID unik gabungan antara 2 UID agar pesan tersentralisasi
+            const roomId = [auth.currentUser.uid, activeChatFriendId].sort().join("_");
+            const msgsRef = collection(db, "chats", roomId, "messages");
+            const q = query(msgsRef, orderBy("timestamp", "asc"));
+
+            unsubscribeChat = onSnapshot(q, (snapshot) => {
+                chatBox.innerHTML = "";
+                snapshot.forEach((msgDoc) => {
+                    const msg = msgDoc.data();
+                    const msgDiv = document.createElement('div');
+                    msgDiv.className = `msg ${msg.senderId === auth.currentUser.uid ? 'sent' : 'received'}`;
+                    msgDiv.innerText = msg.text;
+                    chatBox.appendChild(msgDiv);
+                });
+                chatBox.scrollTop = chatBox.scrollHeight;
+            });
+        }
+
+        document.getElementById('btn-send-chat').onclick = async () => {
+            const text = document.getElementById('chat-input').value;
+            if(!activeChatFriendId || !text.trim()) return;
+
+            const roomId = [auth.currentUser.uid, activeChatFriendId].sort().join("_");
+            const msgsRef = collection(db, "chats", roomId, "messages");
+
+            await addDoc(msgsRef, {
+                senderId: auth.currentUser.uid, text: text, timestamp: Date.now()
+            });
+            document.getElementById('chat-input').value = "";
+        };
     </script>
 </body>
 </html>
