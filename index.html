@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tracker Lucu & Chat</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        /* === RESET & BACKGROUND PASTEL === */
+        body { 
+            font-family: 'Nunito', sans-serif; 
+            margin: 0; padding: 0; 
+            display: flex; justify-content: center; align-items: center; min-height: 100vh;
+            /* Background gradasi pastel pink ke peach */
+            background: linear-gradient(135deg, #ffc3a0 0%, #ffafbd 100%);
+            overflow-x: hidden;
+        }
+
+        /* === KOTAK KACA (GLASSMORPHISM) === */
+        .container { 
+            background: rgba(255, 255, 255, 0.85); 
+            backdrop-filter: blur(10px);
+            padding: 40px 30px; 
+            border-radius: 30px; 
+            box-shadow: 0 15px 35px rgba(255, 105, 135, 0.2); 
+            width: 100%; max-width: 380px; 
+            text-align: center;
+            border: 2px solid rgba(255,255,255,0.8);
+            /* Animasi saat kotak muncul */
+            animation: popIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+        }
+
+        /* === ELEMEN TEKS === */
+        h2 { 
+            color: #ff758c; 
+            font-weight: 800; 
+            font-size: 28px;
+            margin-top: 0;
+            margin-bottom: 25px;
+            /* Animasi melayang untuk judul */
+            animation: float 3s ease-in-out infinite;
+        }
+        .icon-header { font-size: 40px; margin-bottom: -10px; }
+
+        /* === GAYA INPUT FORM === */
+        .form-group { margin-bottom: 18px; text-align: left; }
+        .form-group label { display: block; margin-bottom: 8px; color: #ff9a9e; font-weight: 600; font-size: 14px; padding-left: 5px; }
+        .form-group input { 
+            width: 100%; padding: 14px 15px; 
+            border: 2px solid #ffe2e6; 
+            border-radius: 15px; 
+            box-sizing: border-box; 
+            font-family: 'Nunito', sans-serif;
+            font-size: 15px;
+            background: #fffafa;
+            transition: all 0.3s ease;
+        }
+        /* Animasi saat form diklik (fokus) */
+        .form-group input:focus {
+            outline: none;
+            border-color: #ff758c;
+            box-shadow: 0 0 10px rgba(255, 117, 140, 0.3);
+            background: #ffffff;
+        }
+
+        /* === GAYA TOMBOL LUCU === */
+        button { 
+            width: 100%; padding: 15px; 
+            background: linear-gradient(to right, #ff758c, #ff7eb3); 
+            color: white; border: none; border-radius: 20px; 
+            cursor: pointer; font-size: 18px; font-weight: 800; 
+            font-family: 'Nunito', sans-serif;
+            box-shadow: 0 5px 15px rgba(255, 117, 140, 0.4);
+            transition: all 0.2s ease;
+            margin-top: 10px;
+        }
+        /* Efek bouncy saat tombol disentuh kursor */
+        button:hover { 
+            transform: translateY(-3px) scale(1.02); 
+            box-shadow: 0 8px 20px rgba(255, 117, 140, 0.6); 
+        }
+        button:active { transform: translateY(2px) scale(0.98); } /* Efek tertekan */
+
+        .btn-danger { background: linear-gradient(to right, #ff9a9e, #fecfef); color: #d6336c; box-shadow: 0 5px 15px rgba(254, 207, 239, 0.6); }
+
+        .toggle-link { text-align: center; margin-top: 20px; font-size: 14px; font-weight: 600; color: #ff758c; cursor: pointer; transition: color 0.3s; }
+        .toggle-link:hover { color: #ff4766; text-decoration: underline; }
+        
+        .hidden { display: none !important; }
+        
+        /* === DEFINISI ANIMASI (KEYFRAMES) === */
+        @keyframes popIn {
+            0% { transform: scale(0.8) translateY(50px); opacity: 0; }
+            100% { transform: scale(1) translateY(0); opacity: 1; }
+        }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+            100% { transform: translateY(0px); }
+        }
+
+        #dashboard-section { max-width: 500px; }
+        .nav-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px dashed #ffe2e6; padding-bottom: 15px; }
+        .nav-bar h3 { color: #ff758c; margin: 0; font-weight: 800; }
+    </style>
+</head>
+<body>
+
+    <div id="login-section" class="container">
+        <div class="icon-header">📍🐾</div>
+        <h2>Masuk Yuk!</h2>
+        <div class="form-group">
+            <label>Email Kamu</label>
+            <input type="email" id="login-email" placeholder="contoh@email.com">
+        </div>
+        <div class="form-group">
+            <label>Password rahasia 🤫</label>
+            <input type="password" id="login-password" placeholder="••••••••">
+        </div>
+        <button id="btn-login">Login Sekarang</button>
+        <div class="toggle-link" id="go-to-register">Belum punya akun? Buat di sini ✨</div>
+    </div>
+
+    <div id="register-section" class="container hidden">
+        <div class="icon-header">✨🚀</div>
+        <h2>Buat Akun Baru</h2>
+        <div class="form-group">
+            <label>Nama Panggilan / Lengkap</label>
+            <input type="text" id="reg-name" placeholder="Siapa namamu?">
+        </div>
+        <div class="form-group">
+            <label>Username Unik</label>
+            <input type="text" id="reg-username" placeholder="@username">
+        </div>
+        <div class="form-group">
+            <label>No. WhatsApp / HP</label>
+            <input type="tel" id="reg-phone" placeholder="08xxxxxxxxxx">
+        </div>
+        <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="reg-email" placeholder="Email aktif ya!">
+        </div>
+        <div class="form-group">
+            <label>Password Rahasia</label>
+            <input type="password" id="reg-password" placeholder="Minimal 6 huruf/angka">
+        </div>
+        <button id="btn-register">Ayo Gabung!</button>
+        <div class="toggle-link" id="go-to-login">Sudah punya akun? Masuk aja 🚪</div>
+    </div>
+
+    <div id="dashboard-section" class="container hidden">
+        <div class="nav-bar">
+            <h3>Hai, <span id="user-display-name">Loading...</span>! 👋</h3>
+            <button id="btn-logout" class="btn-danger" style="width: auto; padding: 10px 20px; font-size: 14px; margin-top:0;">Keluar</button>
+        </div>
+        <div style="font-size: 60px; margin: 20px 0; animation: float 3s ease-in-out infinite;">🗺️</div>
+        <p style="color: #666; font-weight: 600; line-height: 1.6;">
+            Yay! Kamu berhasil masuk.<br>
+            Peta imut dan obrolan seru teman-temanmu akan muncul di sini pada tahap selanjutnya! ✨
+        </p>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // ==========================================
+        // GANTI DENGAN CONFIG FIREBASE KAMU
+        // ==========================================
+        const firebaseConfig = {
+  apiKey: "AIzaSyCkCS0wpcYdO7T80wDyorl6dKxvKW50Y3c",
+  authDomain: "caz-location.firebaseapp.com",
+  databaseURL: "https://caz-location-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "caz-location",
+  storageBucket: "caz-location.firebasestorage.app",
+  messagingSenderId: "221858254329",
+  appId: "1:221858254329:web:73d2ea93ddb566199d0128"
+};
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        const loginSec = document.getElementById('login-section');
+        const registerSec = document.getElementById('register-section');
+        const dashboardSec = document.getElementById('dashboard-section');
+        const userNameDisplay = document.getElementById('user-display-name');
+
+        // Navigasi UI
+        document.getElementById('go-to-register').onclick = () => { loginSec.classList.add('hidden'); registerSec.classList.remove('hidden'); };
+        document.getElementById('go-to-login').onclick = () => { registerSec.classList.add('hidden'); loginSec.classList.remove('hidden'); };
+
+        // Registrasi
+        document.getElementById('btn-register').onclick = async () => {
+            const name = document.getElementById('reg-name').value;
+            const username = document.getElementById('reg-username').value;
+            const phone = document.getElementById('reg-phone').value;
+            const email = document.getElementById('reg-email').value;
+            const password = document.getElementById('reg-password').value;
+
+            if(!name || !username || !phone || !email || !password) return alert("Ups! Tolong isi semua datanya ya! 🥺");
+
+            try {
+                // Tombol loading effect (Opsional)
+                const btn = document.getElementById('btn-register');
+                btn.innerText = "Tunggu sebentar... ⏳";
+                
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                await setDoc(doc(db, "users", user.uid), {
+                    nama: name, username: username, no_telp: phone, email: email, uid: user.uid
+                });
+
+                alert("Hore! Akun berhasil dibuat! 🎉");
+                btn.innerText = "Ayo Gabung!";
+            } catch (error) {
+                alert("Yah gagal: " + error.message);
+                document.getElementById('btn-register').innerText = "Ayo Gabung!";
+            }
+        };
+
+        // Login
+        document.getElementById('btn-login').onclick = async () => {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            
+            const btn = document.getElementById('btn-login');
+            btn.innerText = "Membuka pintu... 🚪";
+
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                btn.innerText = "Login Sekarang";
+            } catch (error) {
+                alert("Login gagal! Pastikan email dan passwordnya benar ya. 🕵️‍♂️");
+                btn.innerText = "Login Sekarang";
+            }
+        };
+
+        // Logout
+        document.getElementById('btn-logout').onclick = () => { signOut(auth); };
+
+        // Pantau Status User
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                loginSec.classList.add('hidden');
+                registerSec.classList.add('hidden');
+                dashboardSec.classList.remove('hidden');
+
+                const docRef = doc(db, "users", user.uid);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    userNameDisplay.innerText = docSnap.data().nama;
+                }
+            } else {
+                loginSec.classList.remove('hidden');
+                registerSec.classList.add('hidden');
+                dashboardSec.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
