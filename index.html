@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Life360 Cute Clone - Full Features</title>
+    <title>Life360 Cute Clone - Superadmin Edition</title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
@@ -22,7 +22,7 @@
             animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
             box-sizing: border-box;
         }
-        h2, h3 { color: #ff758c; font-weight: 800; margin-top: 0; }
+        h2, h3, h4 { color: #ff758c; font-weight: 800; margin-top: 0; }
         .form-group { margin-bottom: 15px; text-align: left; }
         .form-group label { display: block; margin-bottom: 5px; color: #ff9a9e; font-weight: 600; font-size: 14px; }
         .form-group input, .form-group select { 
@@ -33,6 +33,15 @@
         .form-group input:focus, .form-group select:focus { 
             outline: none; border-color: #ff758c; background: #fff;
         }
+        
+        /* Wrapper untuk Input Password + Tombol Mata 👀 */
+        .password-wrapper { display: flex; gap: 5px; align-items: center; }
+        .password-wrapper input { flex: 1; }
+        .btn-eye { 
+            width: auto; padding: 10px 12px; margin: 0; background: #ffe2e6; 
+            color: #ff758c; border-radius: 12px; box-shadow: none; font-size: 16px;
+        }
+
         button { 
             width: 100%; padding: 14px; background: linear-gradient(to right, #ff758c, #ff7eb3); 
             color: white; border: none; border-radius: 20px; cursor: pointer; 
@@ -47,8 +56,8 @@
         /* === DASHBOARD & TABS === */
         #dashboard-section { max-width: 600px; width: 95%; }
         .nav-bar { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px dashed #ffe2e6; padding-bottom: 10px; margin-bottom: 15px; }
-        .tabs { display: flex; justify-content: space-around; margin-bottom: 15px; background: #ffe2e6; padding: 5px; border-radius: 15px; }
-        .tab-btn { background: none; color: #ff758c; box-shadow: none; padding: 8px 12px; font-size: 14px; border-radius: 10px; width: 30%; }
+        .tabs { display: flex; justify-content: space-around; margin-bottom: 15px; background: #ffe2e6; padding: 5px; border-radius: 15px; flex-wrap: wrap; gap: 5px; }
+        .tab-btn { background: none; color: #ff758c; box-shadow: none; padding: 8px 10px; font-size: 13px; border-radius: 10px; width: 22%; flex-grow: 1; }
         .tab-btn.active { background: white; color: #ff758c; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
         .tab-content { display: none; text-align: left; }
         .tab-content.active { display: block; }
@@ -56,17 +65,22 @@
         /* === PETA === */
         #map { height: 350px; width: 100%; border-radius: 20px; border: 3px solid #ffe2e6; margin-top: 10px; }
 
-        /* === DAFTAR USER & CHAT === */
-        .list-container { max-height: 200px; overflow-y: auto; margin-top: 10px; }
-        .item-card { background: white; padding: 10px 15px; border-radius: 15px; margin-bottom: 8px; border: 1px solid #ffe2e6; display: flex; justify-content: space-between; align-items: center; }
+        /* === LIST CARDS & ADMIN AREA === */
+        .list-container { max-height: 250px; overflow-y: auto; margin-top: 10px; }
+        .item-card { background: white; padding: 12px 15px; border-radius: 15px; margin-bottom: 8px; border: 1px solid #ffe2e6; display: flex; justify-content: space-between; align-items: center; }
         .badge { padding: 3px 8px; border-radius: 10px; font-size: 11px; color: white; font-weight: 800; }
         .badge.Keluarga { background: #ff758c; }
         .badge.Teman { background: #4a90e2; }
+        .badge.superadmin { background: #ffd700; color: #333; }
         
+        /* Chat Box */
         #chat-box { height: 250px; overflow-y: auto; background: #fffafa; border: 2px solid #ffe2e6; border-radius: 20px; padding: 15px; margin-bottom: 10px; display: flex; flex-direction: column; }
         .msg { margin-bottom: 10px; padding: 8px 12px; border-radius: 15px; max-width: 70%; font-size: 14px; line-height: 1.4; }
         .msg.sent { background: #ff758c; color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
         .msg.received { background: #e9ecef; color: #333; align-self: flex-start; border-bottom-left-radius: 2px; }
+
+        .admin-actions { display: flex; gap: 5px; }
+        .btn-small { padding: 5px 8px; font-size: 11px; border-radius: 8px; width: auto; }
 
         @keyframes popIn { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
     </style>
@@ -75,19 +89,45 @@
 
     <div id="login-section" class="container">
         <h2>📍 Masuk Aplikasi</h2>
-        <div class="form-group"><label>Email</label><input type="email" id="login-email" placeholder="email@kamu.com"></div>
-        <div class="form-group"><label>Password</label><input type="password" id="login-password" placeholder="••••••••"></div>
+        <div class="form-group"><label>Username Kamu</label><input type="text" id="login-username" placeholder="Masukkan username"></div>
+        <div class="form-group">
+            <label>Password</label>
+            <div class="password-wrapper">
+                <input type="password" id="login-password" placeholder="••••••••">
+                <button type="button" class="btn-eye" onclick="togglePassword('login-password')">👁️</button>
+            </div>
+        </div>
         <button id="btn-login">Login ✨</button>
         <div class="toggle-link" id="go-to-register">Belum punya akun? Daftar di sini 🚀</div>
+        <div class="toggle-link" style="color:#666; font-size:12px; margin-top:10px;" id="forgot-password-link">Lupa Password? Hubungi Superadmin 🤫</div>
+    </div>
+
+    <div id="force-reset-section" class="container hidden">
+        <h2>🔒 Atur Ulang Password</h2>
+        <p style="font-size:14px; color:#666;">Akun Anda telah di-reset oleh Admin. Silakan ganti password default "1234" menjadi password baru Anda.</p>
+        <div class="form-group">
+            <label>Password Baru</label>
+            <div class="password-wrapper">
+                <input type="password" id="forced-new-password" placeholder="Minimal 6 karakter">
+                <button type="button" class="btn-eye" onclick="togglePassword('forced-new-password')">👁️</button>
+            </div>
+        </div>
+        <button id="btn-save-new-password">Simpan & Masuk 💾</button>
     </div>
 
     <div id="register-section" class="container hidden">
         <h2>✨ Daftar Akun Baru</h2>
         <div class="form-group"><label>Nama Lengkap</label><input type="text" id="reg-name" placeholder="Nama Lengkap"></div>
-        <div class="form-group"><label>Username</label><input type="text" id="reg-username" placeholder="Username"></div>
+        <div class="form-group"><label>Username (Gunakan untuk login)</label><input type="text" id="reg-username" placeholder="Contoh: budi123"></div>
         <div class="form-group"><label>No. Telepon / WA</label><input type="tel" id="reg-phone" placeholder="08xxxxxxxxxx"></div>
         <div class="form-group"><label>Email</label><input type="email" id="reg-email" placeholder="email@aktif.com"></div>
-        <div class="form-group"><label>Password</label><input type="password" id="reg-password" placeholder="Minimal 6 karakter"></div>
+        <div class="form-group">
+            <label>Password</label>
+            <div class="password-wrapper">
+                <input type="password" id="reg-password" placeholder="Minimal 6 karakter">
+                <button type="button" class="btn-eye" onclick="togglePassword('reg-password')">👁️</button>
+            </div>
+        </div>
         <button id="btn-register">Gabung Sekarang! 🎉</button>
         <div class="toggle-link" id="go-to-login">Sudah punya akun? Login 🚪</div>
     </div>
@@ -101,7 +141,8 @@
         <div class="tabs">
             <button class="tab-btn active" onclick="switchTab('tab-peta')">🗺️ Peta</button>
             <button class="tab-btn" onclick="switchTab('tab-anggota')">👥 Anggota</button>
-            <button class="tab-btn" onclick="switchTab('tab-chat')">💬 Obrolan</button>
+            <button class="tab-btn" onclick="switchTab('tab-chat')">💬 Chat</button>
+            <button class="tab-btn hidden" id="admin-tab-btn" onclick="switchTab('tab-admin')" style="background:#ffd700; color:#333;">👑 Admin</button>
         </div>
 
         <div id="tab-peta" class="tab-content active">
@@ -137,26 +178,31 @@
                 <button id="btn-send-chat" style="width:auto; padding:10px 20px;">Kirim 🚀</button>
             </div>
         </div>
+
+        <div id="tab-admin" class="tab-content">
+            <h4 style="margin:5px 0; color:#b58900;">Panel Kontrol Akun Terdaftar</h4>
+            <p style="font-size:12px; color:#666; margin-top:0;">Anda bisa melihat semua pengguna, mereset password ke "1234", atau menghapus akun.</p>
+            <div id="admin-all-users-list" class="list-container" style="max-height:300px;"></div>
+        </div>
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, collection, query, where, getDocs, onSnapshot, addDoc, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, query, where, getDocs, onSnapshot, addDoc, orderBy, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         // ==========================================
-        // PASTE / GANTI CONFIG FIREBASE KAMU DI SINI
+        // CONFIG FIREBASE KAMU
         // ==========================================
-       const firebaseConfig = {
-  apiKey: "AIzaSyCkCS0wpcYdO7T80wDyorl6dKxvKW50Y3c",
-  authDomain: "caz-location.firebaseapp.com",
-  databaseURL: "https://caz-location-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "caz-location",
-  storageBucket: "caz-location.firebasestorage.app",
-  messagingSenderId: "221858254329",
-  appId: "1:221858254329:web:73d2ea93ddb566199d0128"
-};
+        const firebaseConfig = {
+            apiKey: "API_KEY_KAMU",
+            authDomain: "PROJECT_ID.firebaseapp.com",
+            projectId: "PROJECT_ID",
+            storageBucket: "PROJECT_ID.appspot.com",
+            messagingSenderId: "SENDER_ID",
+            appId: "APP_ID"
+        };
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -170,6 +216,13 @@
         let activeChatFriendId = null;
         let unsubscribeChat = null;
 
+        // --- FITUR SELEKTIF MATA PASSWORD 👀 ---
+        window.togglePassword = function(inputId) {
+            const input = document.getElementById(inputId);
+            if(input.type === "password") { input.type = "text"; } 
+            else { input.type = "password"; }
+        };
+
         // Navigasi Tab Internal
         window.switchTab = function(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -179,64 +232,132 @@
             if(tabId === 'tab-peta' && mapData) {
                 setTimeout(() => { mapData.invalidateSize(); }, 200);
             }
-        }
+        };
 
-        // --- SISTEM AUTENTIKASI ---
+        // UI navigation
         const loginSec = document.getElementById('login-section');
         const registerSec = document.getElementById('register-section');
         const dashboardSec = document.getElementById('dashboard-section');
+        const forceResetSec = document.getElementById('force-reset-section');
 
         document.getElementById('go-to-register').onclick = () => { loginSec.classList.add('hidden'); registerSec.classList.remove('hidden'); };
         document.getElementById('go-to-login').onclick = () => { registerSec.classList.add('hidden'); loginSec.classList.remove('hidden'); };
+        document.getElementById('forgot-password-link').onclick = () => { alert("Silakan hubungi Superadmin keluarga Anda untuk mereset password akun menjadi '1234'!"); };
 
+        // --- SISTEM REGISTRASI ---
         document.getElementById('btn-register').onclick = async () => {
             const name = document.getElementById('reg-name').value;
-            const username = document.getElementById('reg-username').value;
-            const phone = document.getElementById('reg-phone').value;
-            const email = document.getElementById('reg-email').value;
+            const username = document.getElementById('reg-username').value.trim().toLowerCase();
+            const phone = document.getElementById('reg-phone').value.trim();
+            const email = document.getElementById('reg-email').value.trim();
             const password = document.getElementById('reg-password').value;
 
             if(!name || !username || !phone || !email || !password) return alert("Isi semua data ya! 🥺");
 
             try {
-                const cred = await createUserWithEmailAndPassword(auth, email, password);
+                // Cek ketersediaan username di Firestore agar tidak duplikat
+                const qUser = query(collection(db, "users"), where("username", "==", username));
+                const snapUser = await getDocs(qUser);
+                if(!snapUser.empty) return alert("Username sudah dipakai orang lain! Ganti yang unik ya 🥺");
+
+                const cred = await createUserWithEmailAndPassword(auth, email, "bypass_secure_key");
+                
+                // Menentukan superadmin pertama jika username bernilai "admin"
+                const userRole = (username === "admin") ? "superadmin" : "user";
+
                 await setDoc(doc(db, "users", cred.user.uid), {
-                    nama: name, username: username, no_telp: phone, email: email, uid: cred.user.uid
+                    nama: name, username: username, no_telp: phone, email: email, uid: cred.user.uid,
+                    password: password, role: userRole, needsReset: false
                 });
                 alert("Pendaftaran Berhasil! 🎉");
             } catch(e) { alert(e.message); }
         };
 
+        // --- SISTEM LOGIN (BERDASARKAN USERNAME) ---
         document.getElementById('btn-login').onclick = async () => {
-            const email = document.getElementById('login-email').value;
-            const password = document.getElementById('login-password').value;
-            try { await signInWithEmailAndPassword(auth, email, password); } 
-            catch(e) { alert("Login gagal, periksa akun kembali!"); }
+            const usernameInput = document.getElementById('login-username').value.trim().toLowerCase();
+            const passwordInput = document.getElementById('login-password').value;
+
+            if(!usernameInput || !passwordInput) return alert("Masukkan username & password kamu!");
+
+            try {
+                // Cari data email berdasarkan username di Firestore
+                const q = query(collection(db, "users"), where("username", "==", usernameInput));
+                const snap = await getDocs(q);
+
+                if(snap.empty) return alert("Username tidak terdaftar! 🕵️‍♂️");
+
+                const userData = snap.docs[0].data();
+
+                // CEK JIKA AKUN DILOCK / DORESET OLEH ADMIN
+                if(userData.needsReset === true) {
+                    if(passwordInput !== "1234") {
+                        return alert("Akun kamu telah di-reset oleh Superadmin. Silakan masuk menggunakan password default '1234'! 🤫");
+                    }
+                    
+                    // Alihkan ke Layar Ubah Password Paksa
+                    loginSec.classList.add('hidden');
+                    forceResetSec.classList.remove('hidden');
+
+                    document.getElementById('btn-save-new-password').onclick = async () => {
+                        const newPass = document.getElementById('forced-new-password').value;
+                        if(newPass.length < 6 || newPass === "1234") return alert("Password baru minimal 6 huruf dan tidak boleh '1234'!");
+                        
+                        await updateDoc(doc(db, "users", userData.uid), {
+                            password: newPass,
+                            needsReset: false
+                        });
+                        alert("Password sukses diperbarui! Silakan Login kembali memakai password barumu ✨");
+                        location.reload();
+                    };
+                    return;
+                }
+
+                // Cocokkan input password dengan password data di Firestore
+                if(passwordInput !== userData.password) {
+                    return alert("Password salah! Coba diingat-ingat lagi ya 🥺");
+                }
+
+                // Sukses Bypass Login via Firebase Auth
+                await signInWithEmailAndPassword(auth, userData.email, "bypass_secure_key");
+
+            } catch(e) { alert("Login Error: Akun bermasalah atau dihapus admin."); }
         };
 
         document.getElementById('btn-logout').onclick = () => { signOut(auth); location.reload(); };
 
-        // --- CORE LOGIC SETELAH LOGIN ---
+        // --- PANTAU STATUS AKUN ---
         onAuthStateChanged(auth, async (user) => {
             if (user) {
+                // Pastikan data Firestore-nya masih ada (Biar sinkron kalau dihapus Admin)
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                if(!userDoc.exists()) {
+                    alert("Akun Anda telah dinonaktifkan/dihapus oleh Superadmin.");
+                    signOut(auth);
+                    return;
+                }
+
                 loginSec.classList.add('hidden'); registerSec.classList.add('hidden');
                 dashboardSec.classList.remove('hidden');
 
-                const userDoc = await getDoc(doc(db, "users", user.uid));
-                if(userDoc.exists()) {
-                    currentUserData = userDoc.data();
-                    document.getElementById('user-display-name').innerText = currentUserData.nama;
-                    
-                    initMap();
-                    startLocationTracking();
-                    listenToFriendsListAndLocations();
+                currentUserData = userDoc.data();
+                document.getElementById('user-display-name').innerText = currentUserData.nama;
+                
+                initMap();
+                startLocationTracking();
+                listenToFriendsListAndLocations();
+
+                // Cek Role Superadmin untuk Membuka Fitur Tab Tambahan
+                if(currentUserData.role === "superadmin") {
+                    document.getElementById('admin-tab-btn').classList.remove('hidden');
+                    listenToAllUsersForAdmin();
                 }
             } else {
                 loginSec.classList.remove('hidden'); dashboardSec.classList.add('hidden');
             }
         });
 
-        // --- SISTEM PETA (LEAFLET) ---
+        // --- SISTEM PETA ---
         function initMap() {
             if(!mapData) {
                 mapData = L.map('map').setView([-6.2088, 106.8456], 13);
@@ -253,7 +374,6 @@
                     if (myMarker) { myMarker.setLatLng([lat, lng]); } 
                     else { myMarker = L.marker([lat, lng]).addTo(mapData).bindPopup("<b>Saya (Kamu)</b>").openPopup(); mapData.setView([lat, lng], 15); }
 
-                    // Upload lokasi ke Firestore khusus koleksi penjejak lokasi
                     await setDoc(doc(db, "locations", auth.currentUser.uid), {
                         nama: currentUserData.nama, lat: lat, lng: lng, last_update: Date.now()
                     });
@@ -261,31 +381,28 @@
             }
         }
 
-        // --- LOGIKA HUBUNGAN & PELACAKAN TEMAN ---
+        // --- DAFTAR ANGGOTA & RELASI KONTAK ---
         document.getElementById('btn-add-friend').onclick = async () => {
             const fName = document.getElementById('friend-name').value;
-            const fPhone = document.getElementById('friend-phone').value;
+            const fPhone = document.getElementById('friend-phone').value.trim();
             const fCat = document.getElementById('friend-category').value;
 
-            if(!fName || !fPhone) return alert("Lengkapi data anggota yang ingin dicari!");
+            if(!fName || !fPhone) return alert("Lengkapi data kontak yang dicari!");
 
-            // Cari user di database berdasarkan No Telepon
             const q = query(collection(db, "users"), where("no_telp", "==", fPhone));
             const querySnap = await getDocs(q);
 
             if(querySnap.empty) {
-                alert("Nomor telepon tidak ditemukan! Pastikan anggota sudah mendaftar aplikasi ini.");
+                alert("Nomor HP tidak ditemukan!");
             } else {
                 const foundUser = querySnap.docs[0].data();
-                if(foundUser.uid === auth.currentUser.uid) return alert("Tidak bisa menambahkan diri sendiri!");
+                if(foundUser.uid === auth.currentUser.uid) return alert("Tidak bisa menambah diri sendiri!");
                 
-                // Simpan ke daftar kontak kita di Firestore
                 await setDoc(doc(db, "users", auth.currentUser.uid, "contacts", foundUser.uid), {
                     uid: foundUser.uid, nama: fName, no_telp: fPhone, kategori: fCat
                 });
-                alert(`Berhasil menambahkan ${fName} sebagai ${fCat}! ✨`);
-                document.getElementById('friend-name').value = "";
-                document.getElementById('friend-phone').value = "";
+                alert(`Berhasil terhubung dengan ${fName}! ✨`);
+                document.getElementById('friend-name').value = ""; document.getElementById('friend-phone').value = "";
             }
         };
 
@@ -294,69 +411,53 @@
             onSnapshot(contactsRef, (snapshot) => {
                 const friendListDiv = document.getElementById('friend-list');
                 const chatSelect = document.getElementById('chat-select-user');
-                
                 friendListDiv.innerHTML = "";
                 chatSelect.innerHTML = '<option value="">-- Pilih Anggota --</option>';
 
-                if(snapshot.empty) friendListDiv.innerHTML = "<p style='color:#aaa;'>Belum ada anggota yang ditambahkan.</p>";
+                if(snapshot.empty) friendListDiv.innerHTML = "<p style='color:#aaa;'>Belum ada anggota.</p>";
 
                 snapshot.forEach((contactDoc) => {
                     const friend = contactDoc.data();
                     
-                    // Render List Anggota
                     const card = document.createElement('div');
                     card.className = "item-card";
                     card.innerHTML = `<div><b>${friend.nama}</b><br><small>${friend.no_telp}</small></div>
                                       <span class="badge ${friend.kategori}">${friend.kategori}</span>`;
                     friendListDiv.appendChild(card);
 
-                    // Render Dropdown Pilihan Chat
                     const opt = document.createElement('option');
                     opt.value = friend.uid; opt.innerText = `[${friend.kategori}] ${friend.nama}`;
                     chatSelect.appendChild(opt);
 
-                    // Dengarkan Perubahan Posisi GPS Anggota ini
                     onSnapshot(doc(db, "locations", friend.uid), (locDoc) => {
                         if(locDoc.exists()) {
                             const loc = locDoc.data();
-                            if(friendMarkers[friend.uid]) {
-                                friendMarkers[friend.uid].setLatLng([loc.lat, loc.lng]);
-                            } else {
-                                friendMarkers[friend.uid] = L.marker([loc.lat, loc.lng]).addTo(mapData)
-                                    .bindPopup(`<b>${friend.nama}</b><br>Kategori: ${friend.kategori}`);
-                            }
+                            if(friendMarkers[friend.uid]) { friendMarkers[friend.uid].setLatLng([loc.lat, loc.lng]); } 
+                            else { friendMarkers[friend.uid] = L.marker([loc.lat, loc.lng]).addTo(mapData).bindPopup(`<b>${friend.nama}</b>`); }
                         }
                     });
                 });
             });
         }
 
-        // --- SISTEM REAL-TIME CHAT ---
-        document.getElementById('chat-select-user').onchange = (e) => {
-            activeChatFriendId = e.target.value;
-            loadChatRoom();
-        };
+        // --- SISTEM CHAT ---
+        document.getElementById('chat-select-user').onchange = (e) => { activeChatFriendId = e.target.value; loadChatRoom(); };
 
         function loadChatRoom() {
             if(unsubscribeChat) unsubscribeChat();
-            const chatBox = document.getElementById('chat-box');
-            chatBox.innerHTML = "";
-
+            const chatBox = document.getElementById('chat-box'); chatBox.innerHTML = "";
             if(!activeChatFriendId) return;
 
-            // Membuat Room ID unik gabungan antara 2 UID agar pesan tersentralisasi
             const roomId = [auth.currentUser.uid, activeChatFriendId].sort().join("_");
-            const msgsRef = collection(db, "chats", roomId, "messages");
-            const q = query(msgsRef, orderBy("timestamp", "asc"));
+            const q = query(collection(db, "chats", roomId, "messages"), orderBy("timestamp", "asc"));
 
             unsubscribeChat = onSnapshot(q, (snapshot) => {
                 chatBox.innerHTML = "";
-                snapshot.forEach((msgDoc) => {
-                    const msg = msgDoc.data();
-                    const msgDiv = document.createElement('div');
-                    msgDiv.className = `msg ${msg.senderId === auth.currentUser.uid ? 'sent' : 'received'}`;
-                    msgDiv.innerText = msg.text;
-                    chatBox.appendChild(msgDiv);
+                snapshot.forEach((doc) => {
+                    const msg = doc.data();
+                    const d = document.createElement('div');
+                    d.className = `msg ${msg.senderId === auth.currentUser.uid ? 'sent' : 'received'}`;
+                    d.innerText = msg.text; chatBox.appendChild(d);
                 });
                 chatBox.scrollTop = chatBox.scrollHeight;
             });
@@ -365,14 +466,56 @@
         document.getElementById('btn-send-chat').onclick = async () => {
             const text = document.getElementById('chat-input').value;
             if(!activeChatFriendId || !text.trim()) return;
-
             const roomId = [auth.currentUser.uid, activeChatFriendId].sort().join("_");
-            const msgsRef = collection(db, "chats", roomId, "messages");
-
-            await addDoc(msgsRef, {
-                senderId: auth.currentUser.uid, text: text, timestamp: Date.now()
-            });
+            await addDoc(collection(db, "chats", roomId, "messages"), { senderId: auth.currentUser.uid, text: text, timestamp: Date.now() });
             document.getElementById('chat-input').value = "";
+        };
+
+        // --- LOGIKA UTAMA TAB PANEL SUPERADMIN 👑 ---
+        function listenToAllUsersForAdmin() {
+            onSnapshot(collection(db, "users"), (snapshot) => {
+                const adminListDiv = document.getElementById('admin-all-users-list');
+                adminListDiv.innerHTML = "";
+
+                snapshot.forEach((userDoc) => {
+                    const uData = userDoc.data();
+                    
+                    const card = document.createElement('div');
+                    card.className = "item-card";
+                    card.innerHTML = `
+                        <div style="text-align:left;">
+                            <b>${uData.nama}</b> <span class="badge ${uData.role}">${uData.role}</span><br>
+                            <small>@${uData.username} | ${uData.no_telp}</small>
+                        </div>
+                        <div class="admin-actions">
+                            <button class="btn-small" style="background:#ffc107; color:#333;" onclick="adminResetPassword('${uData.uid}', '${uData.nama}')">Reset</button>
+                            ${uData.role !== 'superadmin' ? `<button class="btn-small" style="background:#dc3545;" onclick="adminDeleteAccount('${uData.uid}', '${uData.nama}')">Hapus</button>` : ''}
+                        </div>
+                    `;
+                    adminListDiv.appendChild(card);
+                });
+            });
+        }
+
+        // Fungsi Global Aksi Admin (Bisa Dipanggil lewat HTML onClick)
+        window.adminResetPassword = async function(uid, name) {
+            if(!confirm(`Apakah Anda yakin ingin mereset password ${name} ke password default "1234"?`)) return;
+            try {
+                await updateDoc(doc(db, "users", uid), {
+                    password: "1234",
+                    needsReset: true
+                });
+                alert(`Password untuk ${name} berhasil di-reset menjadi "1234". Pengguna dipaksa menggantinya saat login kembali! 🔐`);
+            } catch(e) { alert("Gagal mereset password."); }
+        };
+
+        window.adminDeleteAccount = async function(uid, name) {
+            if(!confirm(`PERINGATAN! Apakah Anda yakin ingin menghapus akun ${name} secara permanen dari sistem?`)) return;
+            try {
+                await deleteDoc(doc(db, "users", uid));
+                await deleteDoc(doc(db, "locations", uid));
+                alert(`Akun ${name} sukses dihapus dari database aplikasi! 🗑️`);
+            } catch(e) { alert("Gagal menghapus akun."); }
         };
     </script>
 </body>
