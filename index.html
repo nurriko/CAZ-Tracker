@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Life360 Cute Clone - Superadmin Edition</title>
+    <title>Life360 Cute Clone - Built-in Superadmin</title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
@@ -216,7 +216,7 @@
         let activeChatFriendId = null;
         let unsubscribeChat = null;
 
-        // --- FITUR SELEKTIF MATA PASSWORD 👀 ---
+        // Tampilkan/Sembunyikan Password 👀
         window.togglePassword = function(inputId) {
             const input = document.getElementById(inputId);
             if(input.type === "password") { input.type = "text"; } 
@@ -234,7 +234,6 @@
             }
         };
 
-        // UI navigation
         const loginSec = document.getElementById('login-section');
         const registerSec = document.getElementById('register-section');
         const dashboardSec = document.getElementById('dashboard-section');
@@ -244,7 +243,7 @@
         document.getElementById('go-to-login').onclick = () => { registerSec.classList.add('hidden'); loginSec.classList.remove('hidden'); };
         document.getElementById('forgot-password-link').onclick = () => { alert("Silakan hubungi Superadmin keluarga Anda untuk mereset password akun menjadi '1234'!"); };
 
-        // --- SISTEM REGISTRASI ---
+        // --- SISTEM REGISTRASI PENGGUNA ---
         document.getElementById('btn-register').onclick = async () => {
             const name = document.getElementById('reg-name').value;
             const username = document.getElementById('reg-username').value.trim().toLowerCase();
@@ -253,27 +252,26 @@
             const password = document.getElementById('reg-password').value;
 
             if(!name || !username || !phone || !email || !password) return alert("Isi semua data ya! 🥺");
+            
+            // PROTEKSI: Blokir jika ada orang lain mendaftarkan username "admin"
+            if(username === "admin") return alert("Username 'admin' adalah akun khusus bawaan sistem dan tidak bisa didaftarkan manual! ⛔");
 
             try {
-                // Cek ketersediaan username di Firestore agar tidak duplikat
                 const qUser = query(collection(db, "users"), where("username", "==", username));
                 const snapUser = await getDocs(qUser);
                 if(!snapUser.empty) return alert("Username sudah dipakai orang lain! Ganti yang unik ya 🥺");
 
                 const cred = await createUserWithEmailAndPassword(auth, email, "bypass_secure_key");
                 
-                // Menentukan superadmin pertama jika username bernilai "admin"
-                const userRole = (username === "admin") ? "superadmin" : "user";
-
                 await setDoc(doc(db, "users", cred.user.uid), {
                     nama: name, username: username, no_telp: phone, email: email, uid: cred.user.uid,
-                    password: password, role: userRole, needsReset: false
+                    password: password, role: "user", needsReset: false
                 });
                 alert("Pendaftaran Berhasil! 🎉");
             } catch(e) { alert(e.message); }
         };
 
-        // --- SISTEM LOGIN (BERDASARKAN USERNAME) ---
+        // --- SISTEM LOGIN (DENGAN DETEKSI OTOMATIS SUPERADMIN DI SINI) ---
         document.getElementById('btn-login').onclick = async () => {
             const usernameInput = document.getElementById('login-username').value.trim().toLowerCase();
             const passwordInput = document.getElementById('login-password').value;
@@ -281,7 +279,33 @@
             if(!usernameInput || !passwordInput) return alert("Masukkan username & password kamu!");
 
             try {
-                // Cari data email berdasarkan username di Firestore
+                // LOGIKA KHUSUS: Jika mengetik admin dan admin, buat otomatis akunnya di background jika belum ada
+                if (usernameInput === "admin" && passwordInput === "admin") {
+                    const qAdmin = query(collection(db, "users"), where("username", "==", "admin"));
+                    const snapAdmin = await getDocs(qAdmin);
+
+                    if (snapAdmin.empty) {
+                        // Belum ada, daftarkan otomatis secara diam-diam
+                        try {
+                            const cred = await createUserWithEmailAndPassword(auth, "admin@tracker.com", "bypass_secure_key");
+                            await setDoc(doc(db, "users", cred.user.uid), {
+                                nama: "Super Admin", username: "admin", no_telp: "00000", email: "admin@tracker.com",
+                                uid: cred.user.uid, password: "admin", role: "superadmin", needsReset: false
+                            });
+                            return; // Auth state change akan otomatis mendeteksi login
+                        } catch(err) {
+                            // Jika Auth-nya sudah ada tapi dokumen Firestore-nya terhapus, pasangkan ulang
+                            const cred = await signInWithEmailAndPassword(auth, "admin@tracker.com", "bypass_secure_key");
+                            await setDoc(doc(db, "users", cred.user.uid), {
+                                nama: "Super Admin", username: "admin", no_telp: "00000", email: "admin@tracker.com",
+                                uid: cred.user.uid, password: "admin", role: "superadmin", needsReset: false
+                            });
+                            return;
+                        }
+                    }
+                }
+
+                // Jalankan Pencarian Akun Normal Berdasarkan Username
                 const q = query(collection(db, "users"), where("username", "==", usernameInput));
                 const snap = await getDocs(q);
 
@@ -289,13 +313,12 @@
 
                 const userData = snap.docs[0].data();
 
-                // CEK JIKA AKUN DILOCK / DORESET OLEH ADMIN
+                // Cek Validasi Reset Password dari Admin
                 if(userData.needsReset === true) {
                     if(passwordInput !== "1234") {
-                        return alert("Akun kamu telah di-reset oleh Superadmin. Silakan masuk menggunakan password default '1234'! 🤫");
+                        return alert("Akun Anda telah di-reset oleh Superadmin. Masuk menggunakan password default '1234'!");
                     }
                     
-                    // Alihkan ke Layar Ubah Password Paksa
                     loginSec.classList.add('hidden');
                     forceResetSec.classList.remove('hidden');
 
@@ -304,16 +327,15 @@
                         if(newPass.length < 6 || newPass === "1234") return alert("Password baru minimal 6 huruf dan tidak boleh '1234'!");
                         
                         await updateDoc(doc(db, "users", userData.uid), {
-                            password: newPass,
-                            needsReset: false
+                            password: newPass, needsReset: false
                         });
-                        alert("Password sukses diperbarui! Silakan Login kembali memakai password barumu ✨");
+                        alert("Password sukses diperbarui! Silakan masuk kembali ✨");
                         location.reload();
                     };
                     return;
                 }
 
-                // Cocokkan input password dengan password data di Firestore
+                // Validasi Kecocokan Password
                 if(passwordInput !== userData.password) {
                     return alert("Password salah! Coba diingat-ingat lagi ya 🥺");
                 }
@@ -321,18 +343,17 @@
                 // Sukses Bypass Login via Firebase Auth
                 await signInWithEmailAndPassword(auth, userData.email, "bypass_secure_key");
 
-            } catch(e) { alert("Login Error: Akun bermasalah atau dihapus admin."); }
+            } catch(e) { alert("Login Error: Password salah atau akun bermasalah."); }
         };
 
         document.getElementById('btn-logout').onclick = () => { signOut(auth); location.reload(); };
 
-        // --- PANTAU STATUS AKUN ---
+        // --- MEMANTAU STATUS LOGIN ---
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                // Pastikan data Firestore-nya masih ada (Biar sinkron kalau dihapus Admin)
                 const userDoc = await getDoc(doc(db, "users", user.uid));
                 if(!userDoc.exists()) {
-                    alert("Akun Anda telah dinonaktifkan/dihapus oleh Superadmin.");
+                    alert("Akun Anda telah dinonaktifkan.");
                     signOut(auth);
                     return;
                 }
@@ -347,7 +368,7 @@
                 startLocationTracking();
                 listenToFriendsListAndLocations();
 
-                // Cek Role Superadmin untuk Membuka Fitur Tab Tambahan
+                // Buka Tab Khusus jika login sebagai Superadmin
                 if(currentUserData.role === "superadmin") {
                     document.getElementById('admin-tab-btn').classList.remove('hidden');
                     listenToAllUsersForAdmin();
@@ -357,7 +378,7 @@
             }
         });
 
-        // --- SISTEM PETA ---
+        // --- FITUR GPS PETA ---
         function initMap() {
             if(!mapData) {
                 mapData = L.map('map').setView([-6.2088, 106.8456], 13);
@@ -381,7 +402,7 @@
             }
         }
 
-        // --- DAFTAR ANGGOTA & RELASI KONTAK ---
+        // --- HAK RELASI KONTAK ---
         document.getElementById('btn-add-friend').onclick = async () => {
             const fName = document.getElementById('friend-name').value;
             const fPhone = document.getElementById('friend-phone').value.trim();
@@ -471,7 +492,7 @@
             document.getElementById('chat-input').value = "";
         };
 
-        // --- LOGIKA UTAMA TAB PANEL SUPERADMIN 👑 ---
+        // --- PANEL KONTROL SUPERADMIN 👑 ---
         function listenToAllUsersForAdmin() {
             onSnapshot(collection(db, "users"), (snapshot) => {
                 const adminListDiv = document.getElementById('admin-all-users-list');
@@ -488,8 +509,10 @@
                             <small>@${uData.username} | ${uData.no_telp}</small>
                         </div>
                         <div class="admin-actions">
-                            <button class="btn-small" style="background:#ffc107; color:#333;" onclick="adminResetPassword('${uData.uid}', '${uData.nama}')">Reset</button>
-                            ${uData.role !== 'superadmin' ? `<button class="btn-small" style="background:#dc3545;" onclick="adminDeleteAccount('${uData.uid}', '${uData.nama}')">Hapus</button>` : ''}
+                            ${uData.role !== 'superadmin' ? `
+                                <button class="btn-small" style="background:#ffc107; color:#333;" onclick="adminResetPassword('${uData.uid}', '${uData.nama}')">Reset</button>
+                                <button class="btn-small" style="background:#dc3545;" onclick="adminDeleteAccount('${uData.uid}', '${uData.nama}')">Hapus</button>
+                            ` : '<span style="font-size:11px; color:#aaa; font-style:italic;">Utama</span>'}
                         </div>
                     `;
                     adminListDiv.appendChild(card);
@@ -497,24 +520,20 @@
             });
         }
 
-        // Fungsi Global Aksi Admin (Bisa Dipanggil lewat HTML onClick)
         window.adminResetPassword = async function(uid, name) {
             if(!confirm(`Apakah Anda yakin ingin mereset password ${name} ke password default "1234"?`)) return;
             try {
-                await updateDoc(doc(db, "users", uid), {
-                    password: "1234",
-                    needsReset: true
-                });
-                alert(`Password untuk ${name} berhasil di-reset menjadi "1234". Pengguna dipaksa menggantinya saat login kembali! 🔐`);
+                await updateDoc(doc(db, "users", uid), { password: "1234", needsReset: true });
+                alert(`Password untuk ${name} berhasil di-reset menjadi "1234".`);
             } catch(e) { alert("Gagal mereset password."); }
         };
 
         window.adminDeleteAccount = async function(uid, name) {
-            if(!confirm(`PERINGATAN! Apakah Anda yakin ingin menghapus akun ${name} secara permanen dari sistem?`)) return;
+            if(!confirm(`Apakah Anda yakin ingin menghapus akun ${name} secara permanen?`)) return;
             try {
                 await deleteDoc(doc(db, "users", uid));
                 await deleteDoc(doc(db, "locations", uid));
-                alert(`Akun ${name} sukses dihapus dari database aplikasi! 🗑️`);
+                alert(`Akun ${name} sukses dihapus.`);
             } catch(e) { alert("Gagal menghapus akun."); }
         };
     </script>
