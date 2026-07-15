@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CAZ Tracker - Premium Twilight Edition</title>
+    <title>CAZ Tracker - Detailed Free Map Edition</title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     
+    <!-- MAPLIBRE GL JS UNTUK FITUR ROTASI 2 JARI -->
     <link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet" />
     <style>
         /* === TWILIGHT TECH PALETTE & RESET === */
@@ -67,7 +68,7 @@
         .toggle-link { margin-top: 18px; font-size: 14px; color: #38bdf8; cursor: pointer; font-weight: 700; }
         .hidden { display: none !important; }
 
-        /* === FIXED BOTTOM NAVIGATION BAR (5 TAB) === */
+        /* === DASHBOARD BOTTOM NAVIGATION === */
         #dashboard-section { max-width: 480px; }
         .nav-bar { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 14px; margin-bottom: 18px; }
         
@@ -85,20 +86,21 @@
         .tab-content { display: none; text-align: left; padding-bottom: 20px; animation: fadeInTab 0.4s ease-out forwards; }
         .tab-content.active { display: block; }
 
-        /* === MAP CONFIG AREA === */
-        .map-wrapper { position: relative; width: 100%; height: 380px; border-radius: 24px; overflow: hidden; border: 1px solid rgba(255,255,255,0.15); }
-        #map { height: 100%; width: 100%; background: #0f172a; }
+        /* === PETA AREA (TERANG & DETAIL) === */
+        .map-wrapper { position: relative; width: 100%; height: 380px; border-radius: 24px; overflow: hidden; border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        /* Latar belakang peta dirubah menjadi cerah sebelum map load */
+        #map { height: 100%; width: 100%; background: #e5e7eb; } 
         .btn-recenter-map { 
             position: absolute; bottom: 16px; right: 16px; z-index: 1000;
             width: 52px; height: 52px; background: #1e293b; color: #38bdf8; 
             border: 1px solid rgba(255,255,255,0.2); border-radius: 50%;
-            font-size: 24px; display: flex; justify-content: center; align-items: center; cursor: pointer;
+            font-size: 24px; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
 
         /* CUSTOM AVATAR PIN MAP STYLE */
         .custom-emoji-marker {
             background: #1e293b; border: 3px solid #38bdf8; border-radius: 50%;
-            width: 46px; height: 46px; display: flex; justify-content: center; align-items: center;
+            width: 46px !important; height: 46px !important; display: flex; justify-content: center; align-items: center;
             font-size: 24px; box-shadow: 0 6px 20px rgba(0,0,0,0.5); overflow: hidden; cursor: pointer;
         }
         .custom-emoji-marker img { width: 100%; height: 100%; object-fit: cover; }
@@ -112,7 +114,7 @@
         }
         .maplibregl-popup-anchor-bottom .maplibregl-popup-tip { border-top-color: rgba(30, 41, 59, 0.95) !important; }
         .maplibregl-ctrl-group { background: rgba(30, 41, 59, 0.9) !important; border: 1px solid rgba(255,255,255,0.1); }
-        .maplibregl-ctrl-icon { filter: invert(1); } /* Agar icon kompas jadi putih */
+        .maplibregl-ctrl-icon { filter: invert(1); }
 
         /* === LIST CARDS STYLING === */
         .list-container { max-height: 250px; overflow-y: auto; margin-top: 12px; }
@@ -145,6 +147,7 @@
 
     <div id="toast-container"></div>
 
+    <!-- SECTION: LOGIN -->
     <div id="login-section" class="container">
         <h2 style="font-size:26px;">🛰️ CAZ Location Pro</h2>
         <div class="form-group"><label>Username</label><input type="text" id="login-username" placeholder="Masukkan username"></div>
@@ -160,6 +163,7 @@
         <div class="toggle-link" style="color:#64748b; font-size:12px; margin-top:12px;" id="forgot-password-link">Lupa Password? Hubungi Superadmin</div>
     </div>
 
+    <!-- SECTION: FORCED RESET PASSWORD -->
     <div id="force-reset-section" class="container hidden">
         <h2>🔒 Atur Ulang Password</h2>
         <p style="font-size:14px; color:#94a3b8;">Akun Anda baru saja di-reset. Silakan ganti password default "1234" menjadi password baru Anda.</p>
@@ -173,6 +177,7 @@
         <button id="btn-save-new-password">Simpan & Masuk 💾</button>
     </div>
 
+    <!-- SECTION: REGISTER -->
     <div id="register-section" class="container hidden">
         <h2>✨ Daftar Akun Baru</h2>
         <div class="form-group"><label>Nama Lengkap</label><input type="text" id="reg-name" placeholder="Nama Lengkap"></div>
@@ -201,6 +206,7 @@
         <div class="toggle-link" id="go-to-login">Sudah punya akun? Login 🚪</div>
     </div>
 
+    <!-- SECTION: DASHBOARD MAIN -->
     <div id="dashboard-section" class="container hidden">
         <div class="nav-bar">
             <h3 style="font-size: 16px; display: flex; align-items: center; gap: 8px;">
@@ -209,6 +215,7 @@
             <button id="btn-logout" style="width:auto; padding:6px 14px; background:#ef4444; font-size:12px; border-radius:12px;">Keluar</button>
         </div>
 
+        <!-- TAB 1: PETA LOKASI -->
         <div id="tab-peta" class="tab-content active">
             <div class="map-wrapper">
                 <div id="map"></div>
@@ -226,6 +233,7 @@
             </div>
         </div>
 
+        <!-- TAB 2: ANGGOTA -->
         <div id="tab-anggota" class="tab-content">
             <h4>Tambah Anggota Baru</h4>
             <div class="form-group"><input type="text" id="friend-name" placeholder="Nama panggilan"></div>
@@ -241,6 +249,7 @@
             <div id="friend-list" class="list-container"></div>
         </div>
 
+        <!-- TAB 3: CHAT -->
         <div id="tab-chat" class="tab-content">
             <div class="form-group">
                 <select id="chat-select-user"><option value="">-- Pilih Anggota Chat --</option></select>
@@ -252,6 +261,7 @@
             </div>
         </div>
 
+        <!-- TAB 4: EDIT PROFIL MASING-MASING USER 👤 -->
         <div id="tab-profil" class="tab-content">
             <h4>👤 Pengaturan Profil Saya</h4>
             <div style="background: rgba(15,23,42,0.4); padding:20px; border-radius:18px; border:1px solid rgba(255,255,255,0.05);">
@@ -279,11 +289,13 @@
             </div>
         </div>
 
+        <!-- TAB 5: SUPERADMIN PANEL -->
         <div id="tab-admin" class="tab-content">
             <h4 style="color:#eab308;">👑 Kontrol Pengguna (Superadmin)</h4>
             <div id="admin-all-users-list" class="list-container" style="max-height:360px;"></div>
         </div>
 
+        <!-- FIXED BOTTOM NAVIGATION BAR -->
         <div class="tabs">
             <button class="tab-btn active" onclick="switchTab('tab-peta')">🗺️<br>Peta</button>
             <button class="tab-btn" onclick="switchTab('tab-anggota')">👥<br>Anggota</button>
@@ -293,6 +305,7 @@
         </div>
     </div>
 
+    <!-- SCRIPT MAPLIBRE (MENDUKUNG ROTASI JAR) -->
     <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -326,14 +339,12 @@
         let myLatestLat = null;
         let myLatestLng = null;
         let myCustomPlaces = [];
-
-        // Memori State untuk Mendeteksi Perubahan Status Lokasi (Untuk Audio & Toast)
         let friendLastStatuses = {};
 
         let localBatteryLevel = 100;
         let localIsCharging = false;
 
-        // SYNTESIZED AUDIO NOTIFIKASI IMUT BROWSER (Ting!) 🎵
+        // AUDIO ALERT (Ting!) 🎵
         function playCuteDing() {
             try {
                 const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -341,12 +352,12 @@
                 const gain = ctx.createGain();
                 osc.connect(gain); gain.connect(ctx.destination);
                 osc.type = 'sine';
-                osc.frequency.setValueAtTime(587.33, ctx.currentTime); // Nada D5
-                osc.frequency.setValueAtTime(880, ctx.currentTime + 0.08); // Nada A5 memantul
+                osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+                osc.frequency.setValueAtTime(880, ctx.currentTime + 0.08);
                 gain.gain.setValueAtTime(0.2, ctx.currentTime);
                 gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
                 osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.35);
-            } catch(e) { console.log("Audio Alert dinonaktifkan sistem hingga ada ketukan/klik."); }
+            } catch(e) { console.log("Audio Alert tertahan kebijakan browser."); }
         }
 
         window.launchToast = function(message, type = "success") {
@@ -361,7 +372,6 @@
             }, 3500);
         };
 
-        // RENDERING DYNAMIC UNTUK FOTO ASLI ATAU EMOJI 🖼️
         function renderAvatarHtml(avatarStr) {
             if (avatarStr && avatarStr.startsWith("data:image")) {
                 return `<img src="${avatarStr}" style="width:34px; height:34px; border-radius:50%; object-fit:cover; border:2px solid #38bdf8; display:inline-block; vertical-align:middle;">`;
@@ -370,13 +380,11 @@
             }
         }
 
-        // FUNGSI UPDATE MARKER MAPLIBRE GL JS
         function updateMapMarker(markerObj, lat, lng, avatar, popupHtml) {
             if (markerObj) {
-                markerObj.setLngLat([lng, lat]); // Format MapLibre: [Lng, Lat]
+                markerObj.setLngLat([lng, lat]);
                 markerObj.getElement().innerHTML = (avatar && avatar.startsWith("data:image")) 
-                    ? `<img src="${avatar}">` 
-                    : (avatar || "📍");
+                    ? `<img src="${avatar}">` : (avatar || "📍");
                 markerObj.getPopup().setHTML(popupHtml);
                 return markerObj;
             } else {
@@ -424,7 +432,7 @@
             document.getElementById(tabId).classList.add('active');
             event.currentTarget.classList.add('active');
             if(tabId === 'tab-peta' && mapData) {
-                setTimeout(() => { mapData.resize(); }, 250); // Resize khusus MapLibre
+                setTimeout(() => { mapData.resize(); }, 250); 
             }
         };
 
@@ -435,7 +443,6 @@
 
         document.getElementById('go-to-register').onclick = () => { loginSec.classList.add('hidden'); registerSec.classList.remove('hidden'); };
         document.getElementById('go-to-login').onclick = () => { registerSec.classList.add('hidden'); loginSec.classList.remove('hidden'); };
-        document.getElementById('forgot-password-link').onclick = () => { launchToast("Hubungi Superadmin keluarga Anda untuk mereset sandi ke '1234'!", "warning"); };
 
         // --- REGISTER ---
         document.getElementById('btn-register').onclick = async () => {
@@ -527,8 +534,6 @@
                 currentUserData = userDoc.data();
                 document.getElementById('user-display-name').innerText = currentUserData.nama;
                 document.getElementById('my-avatar-display').innerHTML = renderAvatarHtml(currentUserData.avatar);
-                
-                // Set Isian Default Halaman Input Tab Profil
                 document.getElementById('profile-edit-name').value = currentUserData.nama;
 
                 initMap();
@@ -545,18 +550,16 @@
             }
         });
 
-        // --- FITUR EDIT NAMA & UPLOAD FOTO PROFIL ASLI ---
+        // --- EDIT PROFIL ---
         document.getElementById('btn-save-profile').onclick = async () => {
             const nameEdit = document.getElementById('profile-edit-name').value.trim();
             const emojiEdit = document.getElementById('profile-edit-emoji').value;
             const fileInput = document.getElementById('profile-photo-upload');
 
             if(!nameEdit) return launchToast("Nama tidak boleh kosong!", "warning");
-            
             let targetAvatar = currentUserData.avatar || "🐱";
             if(emojiEdit !== "") { targetAvatar = emojiEdit; }
 
-            // Logika Kompresi Canvas ke Base64 (Agar Ringan Disimpan)
             if(fileInput.files.length > 0) {
                 const file = fileInput.files[0];
                 const reader = new FileReader();
@@ -564,20 +567,15 @@
                     const img = new Image();
                     img.onload = async function() {
                         const canvas = document.createElement('canvas');
-                        const MAX_SIZE = 150; 
-                        let w = img.width, h = img.height;
-                        if (w > h) { if (w > MAX_SIZE) { h *= MAX_SIZE / w; w = MAX_SIZE; } } 
-                        else { if (h > MAX_SIZE) { w *= MAX_SIZE / h; h = MAX_SIZE; } }
+                        const MAX_SIZE = 150; let w = img.width, h = img.height;
+                        if (w > h) { if (w > MAX_SIZE) { h *= MAX_SIZE / w; w = MAX_SIZE; } } else { if (h > MAX_SIZE) { w *= MAX_SIZE / h; h = MAX_SIZE; } }
                         canvas.width = w; canvas.height = h;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, w, h);
-                        
+                        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
                         const base64Photo = canvas.toDataURL('image/jpeg', 0.8);
+                        
                         await updateDoc(doc(db, "users", auth.currentUser.uid), { nama: nameEdit, avatar: base64Photo });
                         await updateDoc(doc(db, "locations", auth.currentUser.uid), { nama: nameEdit, avatar: base64Photo });
-                        
-                        launchToast("Profil & Foto berhasil diperbarui! 📸", "success");
-                        setTimeout(() => location.reload(), 1000);
+                        launchToast("Profil & Foto diperbarui! 📸", "success"); setTimeout(() => location.reload(), 1000);
                     };
                     img.src = e.target.result;
                 };
@@ -585,22 +583,18 @@
             } else {
                 await updateDoc(doc(db, "users", auth.currentUser.uid), { nama: nameEdit, avatar: targetAvatar });
                 await updateDoc(doc(db, "locations", auth.currentUser.uid), { nama: nameEdit, avatar: targetAvatar });
-                launchToast("Profil berhasil diperbarui! ✨", "success");
-                setTimeout(() => location.reload(), 1000);
+                launchToast("Profil berhasil diperbarui! ✨", "success"); setTimeout(() => location.reload(), 1000);
             }
         };
 
         function listenToMyCustomPlaces() {
             onSnapshot(collection(db, "users", auth.currentUser.uid, "custom_places"), (snapshot) => {
                 myCustomPlaces = [];
-                const listDiv = document.getElementById('user-custom-places-list');
-                listDiv.innerHTML = "";
+                const listDiv = document.getElementById('user-custom-places-list'); listDiv.innerHTML = "";
                 if(snapshot.empty) listDiv.innerHTML = "<p style='color:#64748b; font-size:12px; text-align:center;'>Belum ada lokasi kustom.</p>";
-
                 snapshot.forEach((pDoc) => {
                     const place = pDoc.data(); myCustomPlaces.push(place);
-                    const card = document.createElement('div');
-                    card.className = "item-card"; card.style.padding = "8px 12px";
+                    const card = document.createElement('div'); card.className = "item-card"; card.style.padding = "8px 12px";
                     card.innerHTML = `<div style="font-size:13px;">📍 <b>${place.nama_tempat}</b> <br><small style="color:#64748b;">${place.lat.toFixed(4)}, ${place.lng.toFixed(4)}</small></div>
                                       <button class="btn-small" style="background:#ef4444; padding:4px 8px;" onclick="deleteCustomPlace('${place.placeId}')">Hapus 🗑️</button>`;
                     listDiv.appendChild(card);
@@ -612,13 +606,9 @@
             const nameInput = document.getElementById('place-custom-name').value.trim();
             if(!nameInput) return launchToast("Ketik nama tempat!", "warning");
             if(!myLatestLat || !myLatestLng) return launchToast("GPS belum mengunci koordinat!", "danger");
-
             const placeId = "place_" + Date.now();
-            await setDoc(doc(db, "users", auth.currentUser.uid, "custom_places", placeId), {
-                placeId: placeId, nama_tempat: nameInput, lat: myLatestLat, lng: myLatestLng
-            });
-            launchToast(`Berhasil menandai ${nameInput}!`, "success");
-            document.getElementById('place-custom-name').value = "";
+            await setDoc(doc(db, "users", auth.currentUser.uid, "custom_places", placeId), { placeId: placeId, nama_tempat: nameInput, lat: myLatestLat, lng: myLatestLng });
+            launchToast(`Berhasil menandai ${nameInput}!`, "success"); document.getElementById('place-custom-name').value = "";
         };
 
         window.deleteCustomPlace = async function(placeId) {
@@ -627,7 +617,7 @@
             launchToast("Lokasi dihapus!", "success");
         };
 
-        // --- SISTEM PETA BARU (MAPLIBRE GL JS) UNTUK ROTASI JARI ---
+        // --- SISTEM MAPLIBRE + OSM STANDARD (PETA CERAH & SANGAT DETAIL) ---
         function initMap() {
             if(!mapData) {
                 mapData = new maplibregl.Map({
@@ -637,23 +627,28 @@
                         'sources': {
                             'osm': {
                                 'type': 'raster',
-                                'tiles': ['https://a.tile.openstreetmap.org/{z}/{x}/{y}.png'],
+                                'tiles': [
+                                    // MENGGUNAKAN SERVER OPENSTREETMAP (TERANG & SANGAT DETAIL)
+                                    'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                                    'https://b.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                                    'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png'
+                                ],
                                 'tileSize': 256,
-                                'attribution': '© OpenStreetMap'
+                                'attribution': '&copy; OpenStreetMap contributors'
                             }
                         },
                         'layers': [{
-                            'id': 'osm', 'type': 'raster', 'source': 'osm'
+                            'id': 'osm-layer', 'type': 'raster', 'source': 'osm'
                         }]
                     },
-                    center: [106.8456, -6.2088], // Koordinat [Lng, Lat]
+                    center: [106.8456, -6.2088], // Default [Lng, Lat]
                     zoom: 13,
                     pitchWithRotate: true,
                     dragRotate: true,
-                    touchZoomRotate: true // FITUR UTAMA: MENGIZINKAN ROTASI 2 JARI!
+                    touchZoomRotate: true // FITUR ROTASI 2 JARI AKTIF!
                 });
                 
-                // Menambahkan tombol kontrol Kompas di pojok kanan atas
+                // Menambahkan Kompas Navigasi di Peta
                 mapData.addControl(new maplibregl.NavigationControl({
                     showZoom: false, showCompass: true, visualizePitch: true
                 }), 'top-right');
@@ -676,6 +671,11 @@
                     const popupText = `<b>Saya (${currentUserData.nama})</b><br>${zoneStatus}<br>${batteryString}`;
 
                     myMarker = updateMapMarker(myMarker, lat, lng, currentUserData.avatar, popupText);
+                    
+                    // Center peta secara otomatis pada load pertama kali
+                    if(Object.keys(friendMarkers).length === 0 && !myMarker.getPopup().isOpen()) {
+                        mapData.setCenter([lng, lat]);
+                    }
 
                     await setDoc(doc(db, "locations", auth.currentUser.uid), {
                         nama: currentUserData.nama, avatar: currentUserData.avatar, lat: lat, lng: lng,
@@ -692,25 +692,21 @@
             } else { launchToast("Mencari sinyal GPS...", "warning"); }
         };
 
-        // --- ANGGOTA & NOTIFIKASI LIVE REVENUE CHANGE ---
+        // --- RELASI ANGGOTA ---
         document.getElementById('btn-add-friend').onclick = async () => {
             const fName = document.getElementById('friend-name').value;
             const fPhone = document.getElementById('friend-phone').value.trim();
             const fCat = document.getElementById('friend-category').value;
 
             if(!fName || !fPhone) return launchToast("Lengkapi formulir!", "warning");
+            const snap = await getDocs(query(collection(db, "users"), where("no_telp", "==", fPhone)));
 
-            const q = query(collection(db, "users"), where("no_telp", "==", fPhone));
-            const querySnap = await getDocs(q);
-
-            if(querySnap.empty) { launchToast("Nomor HP tidak terdaftar!", "danger"); } 
+            if(snap.empty) { launchToast("Nomor HP tidak ditemukan!", "danger"); } 
             else {
-                const foundUser = querySnap.docs[0].data();
+                const foundUser = snap.docs[0].data();
                 if(foundUser.uid === auth.currentUser.uid) return launchToast("Tidak bisa menambah diri sendiri!", "warning");
                 
-                await setDoc(doc(db, "users", auth.currentUser.uid, "contacts", foundUser.uid), {
-                    uid: foundUser.uid, nama: fName, no_telp: fPhone, kategori: fCat
-                });
+                await setDoc(doc(db, "users", auth.currentUser.uid, "contacts", foundUser.uid), { uid: foundUser.uid, nama: fName, no_telp: fPhone, kategori: fCat });
                 launchToast(`Terhubung dengan ${fName}!`, "success");
                 document.getElementById('friend-name').value = ""; document.getElementById('friend-phone').value = "";
             }
@@ -720,38 +716,28 @@
             onSnapshot(collection(db, "users", auth.currentUser.uid, "contacts"), (snapshot) => {
                 const friendListDiv = document.getElementById('friend-list');
                 const chatSelect = document.getElementById('chat-select-user');
-                friendListDiv.innerHTML = "";
-                chatSelect.innerHTML = '<option value="">-- Pilih Anggota Chat --</option>';
+                friendListDiv.innerHTML = ""; chatSelect.innerHTML = '<option value="">-- Pilih Anggota Chat --</option>';
 
                 if(snapshot.empty) friendListDiv.innerHTML = "<p style='color:#64748b;text-align:center;font-size:13px;'>Belum ada anggota dipantau.</p>";
 
                 snapshot.forEach((contactDoc) => {
                     const friend = contactDoc.data();
-                    const card = document.createElement('div');
-                    card.className = "item-card";
-                    card.innerHTML = `<div style="display:flex; align-items:center; gap:10px;">
-                                        <div id="friend-avatar-card-${friend.uid}"></div>
-                                        <div><b>${friend.nama}</b><br><small id="status-zone-${friend.uid}">🚀 Mendeteksi...</small><br><small id="status-bat-${friend.uid}">🔋 --%</small></div>
-                                      </div>
-                                      <span class="badge ${friend.kategori}">${friend.kategori}</span>`;
+                    const card = document.createElement('div'); card.className = "item-card";
+                    card.innerHTML = `<div style="display:flex; align-items:center; gap:10px;"><div id="friend-avatar-card-${friend.uid}"></div><div><b>${friend.nama}</b><br><small id="status-zone-${friend.uid}">🚀 Mendeteksi...</small><br><small id="status-bat-${friend.uid}">🔋 --%</small></div></div><span class="badge ${friend.kategori}">${friend.kategori}</span>`;
                     friendListDiv.appendChild(card);
 
-                    const opt = document.createElement('option');
-                    opt.value = friend.uid; opt.innerText = `[${friend.kategori}] ${friend.nama}`;
+                    const opt = document.createElement('option'); opt.value = friend.uid; opt.innerText = `[${friend.kategori}] ${friend.nama}`;
                     chatSelect.appendChild(opt);
 
-                    // MONITOR REAL-TIME LOKASI KELUARGA + LIVE TOAST ALERTS & AUDIO BELL 🔔
                     onSnapshot(doc(db, "locations", friend.uid), (locDoc) => {
                         if(locDoc.exists()) {
                             const loc = locDoc.data();
                             const newZone = loc.statusZone || "🚀 Luar Area";
-                            
                             const oldZone = friendLastStatuses[friend.uid];
                             
-                            // TRIGGER NOTIFIKASI: Jika status berubah dan bukan loading pertama kali
                             if(oldZone && oldZone !== newZone) {
                                 launchToast(`📢 ${loc.nama} baru saja sampai ${newZone}!`, "success");
-                                playCuteDing(); // Bunyikan bel imut otomatis
+                                playCuteDing();
                             }
                             friendLastStatuses[friend.uid] = newZone;
                             
@@ -759,7 +745,7 @@
                             document.getElementById(`status-zone-${friend.uid}`).innerText = newZone;
                             document.getElementById(`status-bat-${friend.uid}`).innerText = `🔋 ${loc.battery}% ${loc.charging ? '⚡' : ''}`;
 
-                            const popupText = `<b>${loc.nama}</b><br>${newZone}<br>🔋 ${loc.battery}% ${loc.charging ? '⚡' : ''}`;
+                            const popupText = `<b>${loc.nama}</b><br>${newZone}<br>🔋 ${loc.battery}%`;
                             friendMarkers[friend.uid] = updateMapMarker(friendMarkers[friend.uid], loc.lat, loc.lng, loc.avatar, popupText);
                         }
                     });
@@ -769,21 +755,17 @@
 
         // --- CHAT LOGIC ---
         document.getElementById('chat-select-user').onchange = (e) => { activeChatFriendId = e.target.value; loadChatRoom(); };
-
         function loadChatRoom() {
             if(unsubscribeChat) unsubscribeChat();
             const chatBox = document.getElementById('chat-box'); chatBox.innerHTML = "";
             if(!activeChatFriendId) return;
 
             const roomId = [auth.currentUser.uid, activeChatFriendId].sort().join("_");
-            const q = query(collection(db, "chats", roomId, "messages"), orderBy("timestamp", "asc"));
-
-            unsubscribeChat = onSnapshot(q, (snapshot) => {
+            unsubscribeChat = onSnapshot(query(collection(db, "chats", roomId, "messages"), orderBy("timestamp", "asc")), (snapshot) => {
                 chatBox.innerHTML = "";
                 snapshot.forEach((doc) => {
                     const msg = doc.data();
-                    const d = document.createElement('div');
-                    d.className = `msg ${msg.senderId === auth.currentUser.uid ? 'sent' : 'received'}`;
+                    const d = document.createElement('div'); d.className = `msg ${msg.senderId === auth.currentUser.uid ? 'sent' : 'received'}`;
                     d.innerText = msg.text; chatBox.appendChild(d);
                 });
                 chatBox.scrollTop = chatBox.scrollHeight;
@@ -801,25 +783,13 @@
         // --- SUPERADMIN ---
         function listenToAllUsersForAdmin() {
             onSnapshot(collection(db, "users"), (snapshot) => {
-                const adminListDiv = document.getElementById('admin-all-users-list');
-                adminListDiv.innerHTML = "";
+                const adminListDiv = document.getElementById('admin-all-users-list'); adminListDiv.innerHTML = "";
                 snapshot.forEach((userDoc) => {
                     const uData = userDoc.data();
-                    const card = document.createElement('div');
-                    card.className = "item-card";
-                    card.innerHTML = `
-                        <div style="text-align:left; display:flex; align-items:center; gap:8px;">
-                            ${renderAvatarHtml(uData.avatar)}
-                            <div>
-                                <b>${uData.nama}</b> <span class="badge ${uData.role}">${uData.role}</span><br>
-                                <small>@${uData.username} | ${uData.no_telp}</small>
-                            </div>
-                        </div>
+                    const card = document.createElement('div'); card.className = "item-card";
+                    card.innerHTML = `<div style="text-align:left; display:flex; align-items:center; gap:8px;">${renderAvatarHtml(uData.avatar)}<div><b>${uData.nama}</b> <span class="badge ${uData.role}">${uData.role}</span><br><small>@${uData.username} | ${uData.no_telp}</small></div></div>
                         <div class="admin-actions">
-                            ${uData.role !== 'superadmin' ? `
-                                <button class="btn-small" style="background:#f59e0b; color:#0f172a;" onclick="adminResetPassword('${uData.uid}', '${uData.nama}')">Reset</button>
-                                <button class="btn-small" style="background:#ef4444;" onclick="adminDeleteAccount('${uData.uid}', '${uData.nama}')">Hapus</button>
-                            ` : '<span style="font-size:11px; color:#64748b;">Main Admin</span>'}
+                            ${uData.role !== 'superadmin' ? `<button class="btn-small" style="background:#f59e0b; color:#0f172a;" onclick="adminResetPassword('${uData.uid}', '${uData.nama}')">Reset</button><button class="btn-small" style="background:#ef4444;" onclick="adminDeleteAccount('${uData.uid}', '${uData.nama}')">Hapus</button>` : '<span style="font-size:11px; color:#64748b;">Main Admin</span>'}
                         </div>`;
                     adminListDiv.appendChild(card);
                 });
@@ -829,14 +799,13 @@
         window.adminResetPassword = async function(uid, name) {
             if(!confirm(`Reset sandi ${name} ke "1234"?`)) return;
             await updateDoc(doc(db, "users", uid), { password: "1234", needsReset: true });
-            launchToast(`Sandi ${name} di-reset ke '1234'`, "success");
+            launchToast("Sandi berhasil di-reset.", "success");
         };
 
         window.adminDeleteAccount = async function(uid, name) {
             if(!confirm(`Hapus permanen akun ${name}?`)) return;
-            await deleteDoc(doc(db, "users", uid));
-            await deleteDoc(doc(db, "locations", uid));
-            launchToast(`Akun ${name} telah dihapus!`, "success");
+            await deleteDoc(doc(db, "users", uid)); await deleteDoc(doc(db, "locations", uid));
+            launchToast("Akun dihapus.", "success");
         };
     </script>
 </body>
