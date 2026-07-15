@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Life360 Cute Clone - Built-in Superadmin</title>
+    <title>CAZ Location - Tracker & Chat</title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
@@ -40,6 +40,7 @@
         .btn-eye { 
             width: auto; padding: 10px 12px; margin: 0; background: #ffe2e6; 
             color: #ff758c; border-radius: 12px; box-shadow: none; font-size: 16px;
+            border: none; cursor: pointer;
         }
 
         button { 
@@ -57,13 +58,25 @@
         #dashboard-section { max-width: 600px; width: 95%; }
         .nav-bar { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px dashed #ffe2e6; padding-bottom: 10px; margin-bottom: 15px; }
         .tabs { display: flex; justify-content: space-around; margin-bottom: 15px; background: #ffe2e6; padding: 5px; border-radius: 15px; flex-wrap: wrap; gap: 5px; }
-        .tab-btn { background: none; color: #ff758c; box-shadow: none; padding: 8px 10px; font-size: 13px; border-radius: 10px; width: 22%; flex-grow: 1; }
+        .tab-btn { background: none; color: #ff758c; box-shadow: none; padding: 8px 10px; font-size: 13px; border-radius: 10px; width: 22%; flex-grow: 1; border: none; cursor: pointer; }
         .tab-btn.active { background: white; color: #ff758c; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
         .tab-content { display: none; text-align: left; }
         .tab-content.active { display: block; }
 
-        /* === PETA === */
-        #map { height: 350px; width: 100%; border-radius: 20px; border: 3px solid #ffe2e6; margin-top: 10px; }
+        /* === PETA BERSAMA TOMBOL RECENTER FLOATING === */
+        .map-wrapper { position: relative; width: 100%; margin-top: 10px; }
+        #map { height: 350px; width: 100%; border-radius: 20px; border: 3px solid #ffe2e6; }
+        
+        /* Tombol Bulat Recenter Melayang di atas Peta 🎯 */
+        .btn-recenter-map { 
+            position: absolute; bottom: 15px; right: 15px; z-index: 1000;
+            width: 45px; height: 45px; padding: 0; line-height: 45px;
+            background: white; color: #ff758c; border: 3px solid #ffe2e6; 
+            border-radius: 50%; box-shadow: 0 4px 15px rgba(0,0,0,0.15); 
+            font-size: 20px; text-align: center; cursor: pointer; transition: all 0.2s;
+        }
+        .btn-recenter-map:hover { transform: scale(1.1); background: #fff0f2; }
+        .btn-recenter-map:active { transform: scale(0.9); }
 
         /* === LIST CARDS & ADMIN AREA === */
         .list-container { max-height: 250px; overflow-y: auto; margin-top: 10px; }
@@ -80,7 +93,7 @@
         .msg.received { background: #e9ecef; color: #333; align-self: flex-start; border-bottom-left-radius: 2px; }
 
         .admin-actions { display: flex; gap: 5px; }
-        .btn-small { padding: 5px 8px; font-size: 11px; border-radius: 8px; width: auto; }
+        .btn-small { padding: 5px 8px; font-size: 11px; border-radius: 8px; width: auto; border: none; cursor: pointer; color: white; }
 
         @keyframes popIn { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
     </style>
@@ -147,7 +160,10 @@
 
         <div id="tab-peta" class="tab-content active">
             <h4 style="margin:5px 0; color:#ff758c;">Lokasi Real-Time Keluarga & Teman</h4>
-            <div id="map"></div>
+            <div class="map-wrapper">
+                <div id="map"></div>
+                <button type="button" id="btn-recenter" class="btn-recenter-map" title="Kembali ke Lokasi Saya">🎯</button>
+            </div>
         </div>
 
         <div id="tab-anggota" class="tab-content">
@@ -193,17 +209,17 @@
         import { getFirestore, doc, setDoc, getDoc, collection, query, where, getDocs, onSnapshot, addDoc, orderBy, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         // ==========================================
-        // CONFIG FIREBASE KAMU
+        // CONFIG FIREBASE MILIK KELUARGAMU (SUDAH AKTIF)
         // ==========================================
-      const firebaseConfig = {
-  apiKey: "AIzaSyCkCS0wpcYdO7T80wDyorl6dKxvKW50Y3c",
-  authDomain: "caz-location.firebaseapp.com",
-  databaseURL: "https://caz-location-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "caz-location",
-  storageBucket: "caz-location.firebasestorage.app",
-  messagingSenderId: "221858254329",
-  appId: "1:221858254329:web:73d2ea93ddb566199d0128"
-};
+        const firebaseConfig = {
+            apiKey: "AIzaSyCkCS0wpcYdO7T80wDyorl6dKxvKW50Y3c",
+            authDomain: "caz-location.firebaseapp.com",
+            databaseURL: "https://caz-location-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "caz-location",
+            storageBucket: "caz-location.firebasestorage.app",
+            messagingSenderId: "221858254329",
+            appId: "1:221858254329:web:73d2ea93ddb566199d0128"
+        };
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -216,6 +232,9 @@
         let friendMarkers = {};
         let activeChatFriendId = null;
         let unsubscribeChat = null;
+
+        let myLatestLat = null;
+        let myLatestLng = null;
 
         // Tampilkan/Sembunyikan Password 👀
         window.togglePassword = function(inputId) {
@@ -253,9 +272,7 @@
             const password = document.getElementById('reg-password').value;
 
             if(!name || !username || !phone || !email || !password) return alert("Isi semua data ya! 🥺");
-            
-            // PROTEKSI: Blokir jika ada orang lain mendaftarkan username "admin"
-            if(username === "admin") return alert("Username 'admin' adalah akun khusus bawaan sistem dan tidak bisa didaftarkan manual! ⛔");
+            if(username === "admin") return alert("Username 'admin' adalah milik sistem khusus! ⛔");
 
             try {
                 const qUser = query(collection(db, "users"), where("username", "==", username));
@@ -272,7 +289,7 @@
             } catch(e) { alert(e.message); }
         };
 
-        // --- SISTEM LOGIN (DENGAN DETEKSI OTOMATIS SUPERADMIN DI SINI) ---
+        // --- SISTEM LOGIN (DENGAN SUPERADMIN INSTAN) ---
         document.getElementById('btn-login').onclick = async () => {
             const usernameInput = document.getElementById('login-username').value.trim().toLowerCase();
             const passwordInput = document.getElementById('login-password').value;
@@ -280,22 +297,19 @@
             if(!usernameInput || !passwordInput) return alert("Masukkan username & password kamu!");
 
             try {
-                // LOGIKA KHUSUS: Jika mengetik admin dan admin, buat otomatis akunnya di background jika belum ada
                 if (usernameInput === "admin" && passwordInput === "admin") {
                     const qAdmin = query(collection(db, "users"), where("username", "==", "admin"));
                     const snapAdmin = await getDocs(qAdmin);
 
                     if (snapAdmin.empty) {
-                        // Belum ada, daftarkan otomatis secara diam-diam
                         try {
                             const cred = await createUserWithEmailAndPassword(auth, "admin@tracker.com", "bypass_secure_key");
                             await setDoc(doc(db, "users", cred.user.uid), {
                                 nama: "Super Admin", username: "admin", no_telp: "00000", email: "admin@tracker.com",
                                 uid: cred.user.uid, password: "admin", role: "superadmin", needsReset: false
                             });
-                            return; // Auth state change akan otomatis mendeteksi login
+                            return;
                         } catch(err) {
-                            // Jika Auth-nya sudah ada tapi dokumen Firestore-nya terhapus, pasangkan ulang
                             const cred = await signInWithEmailAndPassword(auth, "admin@tracker.com", "bypass_secure_key");
                             await setDoc(doc(db, "users", cred.user.uid), {
                                 nama: "Super Admin", username: "admin", no_telp: "00000", email: "admin@tracker.com",
@@ -306,7 +320,6 @@
                     }
                 }
 
-                // Jalankan Pencarian Akun Normal Berdasarkan Username
                 const q = query(collection(db, "users"), where("username", "==", usernameInput));
                 const snap = await getDocs(q);
 
@@ -314,7 +327,6 @@
 
                 const userData = snap.docs[0].data();
 
-                // Cek Validasi Reset Password dari Admin
                 if(userData.needsReset === true) {
                     if(passwordInput !== "1234") {
                         return alert("Akun Anda telah di-reset oleh Superadmin. Masuk menggunakan password default '1234'!");
@@ -336,12 +348,10 @@
                     return;
                 }
 
-                // Validasi Kecocokan Password
                 if(passwordInput !== userData.password) {
                     return alert("Password salah! Coba diingat-ingat lagi ya 🥺");
                 }
 
-                // Sukses Bypass Login via Firebase Auth
                 await signInWithEmailAndPassword(auth, userData.email, "bypass_secure_key");
 
             } catch(e) { alert("Login Error: Password salah atau akun bermasalah."); }
@@ -369,7 +379,6 @@
                 startLocationTracking();
                 listenToFriendsListAndLocations();
 
-                // Buka Tab Khusus jika login sebagai Superadmin
                 if(currentUserData.role === "superadmin") {
                     document.getElementById('admin-tab-btn').classList.remove('hidden');
                     listenToAllUsersForAdmin();
@@ -393,8 +402,15 @@
                     const lat = pos.coords.latitude;
                     const lng = pos.coords.longitude;
                     
-                    if (myMarker) { myMarker.setLatLng([lat, lng]); } 
-                    else { myMarker = L.marker([lat, lng]).addTo(mapData).bindPopup("<b>Saya (Kamu)</b>").openPopup(); mapData.setView([lat, lng], 15); }
+                    myLatestLat = lat;
+                    myLatestLng = lng;
+                    
+                    if (myMarker) { 
+                        myMarker.setLatLng([lat, lng]); 
+                    } else { 
+                        myMarker = L.marker([lat, lng]).addTo(mapData).bindPopup("<b>Saya (Kamu)</b>").openPopup(); 
+                        mapData.setView([lat, lng], 15); 
+                    }
 
                     await setDoc(doc(db, "locations", auth.currentUser.uid), {
                         nama: currentUserData.nama, lat: lat, lng: lng, last_update: Date.now()
@@ -402,6 +418,19 @@
                 }, (err) => console.log(err), { enableHighAccuracy: true });
             }
         }
+
+        // AKSI KLIK TOMBOL RECENTER `🎯`
+        document.getElementById('btn-recenter').onclick = () => {
+            if(myLatestLat && myLatestLng && mapData) {
+                mapData.panTo([myLatestLat, myLatestLng]);
+                mapData.setZoom(15);
+                if(myMarker) {
+                    myMarker.openPopup();
+                }
+            } else {
+                alert("Aplikasi sedang mencari sinyal GPS kamu, tunggu sebentar ya! ⏳");
+            }
+        };
 
         // --- HAK RELASI KONTAK ---
         document.getElementById('btn-add-friend').onclick = async () => {
@@ -511,7 +540,7 @@
                         </div>
                         <div class="admin-actions">
                             ${uData.role !== 'superadmin' ? `
-                                <button class="btn-small" style="background:#ffc107; color:#333;" onclick="adminResetPassword('${uData.uid}', '${uData.nama}')">Reset</button>
+                                <button class="btn-small" style="background:#ffc107;" onclick="adminResetPassword('${uData.uid}', '${uData.nama}')">Reset</button>
                                 <button class="btn-small" style="background:#dc3545;" onclick="adminDeleteAccount('${uData.uid}', '${uData.nama}')">Hapus</button>
                             ` : '<span style="font-size:11px; color:#aaa; font-style:italic;">Utama</span>'}
                         </div>
