@@ -44,10 +44,10 @@ jobs:
       run: |
         # =========================================================================
         # PERHATIAN: GANTI TAUTAN DI BAWAH DENGAN LINK GITHUB PAGES APLIKASIMU!
-        # Contoh: "https://nurriko.github.io/CAZ-tracker"
+        # Contoh: "https://nurriko.github.io/CAZ-Tracker"
         # =========================================================================
         
-        echo '{"appId": "com.caz.location.app", "appName": "CAZ Tracker", "webDir": "www", "server": {"url": "https://nurriko.github.io/CAZ-tracker", "cleartext": true}}' > capacitor.config.json
+        echo '{"appId": "com.caz.location.app", "appName": "CAZ Tracker", "webDir": "www", "server": {"url": "https://nurriko.github.io/CAZ-Tracker", "cleartext": true}}' > capacitor.config.json
         
         npx cap add android
 
