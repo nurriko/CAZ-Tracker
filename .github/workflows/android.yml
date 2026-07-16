@@ -47,7 +47,7 @@ jobs:
         # Contoh: "https://nurriko.github.io/CAZ-tracker"
         # =========================================================================
         
-        echo '{"appId": "com.caz.location.app", "appName": "CAZ Tracker", "webDir": "www", "server": {"url": "MASUKKAN_LINK_GITHUB_PAGES_KAMU_DISINI", "cleartext": true}}' > capacitor.config.json
+        echo '{"appId": "com.caz.location.app", "appName": "CAZ Tracker", "webDir": "www", "server": {"url": "https://nurriko.github.io/CAZ-tracker", "cleartext": true}}' > capacitor.config.json
         
         npx cap add android
 
