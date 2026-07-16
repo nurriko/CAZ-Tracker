@@ -1,4 +1,4 @@
-name: Build Android APK Cloud Pro
+name: Build Android APK Cloud (Live OTA Edition)
 
 on:
   push:
@@ -40,38 +40,40 @@ jobs:
         npm install @capacitor/core@6 @capacitor/cli@6 @capacitor/android@6
         npm install -g @capacitor/assets
 
-    - name: Konfigurasi & Pembuatan Struktur Android
+    - name: Konfigurasi Live OTA Update & Struktur Android
       run: |
-        echo '{"appId": "com.caz.location.app", "appName": "CAZ Tracker", "webDir": "www"}' > capacitor.config.json
+        # =========================================================================
+        # PERHATIAN: GANTI TAUTAN DI BAWAH DENGAN LINK GITHUB PAGES APLIKASIMU!
+        # Contoh: "https://nurriko.github.io/CAZ-tracker"
+        # =========================================================================
+        
+        echo '{"appId": "com.caz.location.app", "appName": "CAZ Tracker", "webDir": "www", "server": {"url": "MASUKKAN_LINK_GITHUB_PAGES_KAMU_DISINI", "cleartext": true}}' > capacitor.config.json
+        
         npx cap add android
 
-    - name: Pasang Logo Kustom Keluarga CAZ 🚀
+    - name: Pasang Logo Kustom Keluarga CAZ
       run: |
-        # Jika file icon.png terdeteksi di GitHub, mesin akan memprosesnya jadi logo APK
         if [ -f icon.png ]; then
-          echo "Logo icon.png ditemukan! Memulai proses rendering logo..."
           mkdir -p assets
           cp icon.png assets/icon.png
           npx capacitor-assets generate --android
-        else
-          echo "INFO: File icon.png tidak ditemukan. Menggunakan logo default bawaan Capacitor."
         fi
 
-    - name: Suntik Izin Akses GPS Latar Belakang (Metode Aman)
+    - name: Suntik Izin Akses GPS Latar Belakang
       run: |
         MANIFEST_PATH="android/app/src/main/AndroidManifest.xml"
         PERMISSIONS='    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />\n    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />\n    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />\n</manifest>'
         sed -i "s|<\/manifest>|${PERMISSIONS}|g" $MANIFEST_PATH
         npx cap sync android
 
-    - name: Merakit File APK dengan Gradle Cloud
+    - name: Merakit File APK
       run: |
         cd android
         chmod +x gradlew
         ./gradlew assembleDebug
 
-    - name: Mengunggah File APK Resmi
+    - name: Mengunggah File APK Resmi OTA
       uses: actions/upload-artifact@v4
       with:
-        name: CAZ-Tracker-Official-APK
+        name: CAZ-Tracker-OTA-APK
         path: android/app/build/outputs/apk/debug/app-debug.apk
