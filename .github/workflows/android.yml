@@ -1,9 +1,9 @@
-name: Build Android APK Cloud
+name: Build Android APK Cloud Pro
 
 on:
   push:
-    branches: [ main, master ] # Jalankan otomatis setiap ada commit baru di branch main/master
-  workflow_dispatch: # Memungkinkan kamu menjalankan build secara manual kapan saja
+    branches: [ main, master ]
+  workflow_dispatch:
 
 jobs:
   build:
@@ -24,30 +24,43 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
 
-    - name: Inisialisasi Capacitor & Inject Background GPS
+    - name: Inisialisasi Proyek & Aset Web
       run: |
-        # 1. Siapkan folder web internal untuk pengemasan aplikasi
+        # 1. Pastikan folder www siap dan index.html ada di tempatnya
         mkdir -p www
         if [ -f index.html ]; then
           cp index.html www/
+        else
+          echo "ERROR: File index.html tidak ditemukan di root repository kamu!"
+          exit 1
         fi
 
-        # 2. Inisialisasi NPM dan install Core Capacitor Android
-        npm init -y
-        npm install @capacitor/core @capacitor/cli @capacitor/android
+        # 2. Buat file package.json dasar agar npm tidak error
+        echo '{"name": "caz-tracker", "version": "1.0.0", "private": true, "dependencies": {}, "devDependencies": {}}' > package.json
 
-        # 3. Buat file konfigurasi Capacitor secara otomatis tanpa prompt interaktif
-        echo '{"appId": "com.caz.location.app", "appName": "CAZ Tracker", "webDir": "www", "bundledWebRuntime": false}' > capacitor.config.json
+    - name: Instalasi Modul Capacitor
+      run: |
+        # Instal Core, CLI, dan Android secara berurutan dan aman
+        npm install @capacitor/core@6 @capacitor/cli@6 @capacitor/android@6
 
-        # 4. Tambahkan platform Android asli ke dalam proyek
+    - name: Konfigurasi & Pembuatan Struktur Android
+      run: |
+        # Buat file konfigurasi Capacitor resmi
+        echo '{"appId": "com.caz.location.app", "appName": "CAZ Tracker", "webDir": "www"}' > capacitor.config.json
+        
+        # Tambahkan platform Android asli
         npx cap add android
 
-        # 5. Suntikkan Izin Akses GPS "Sepanjang Waktu" ke dalam file AndroidManifest.xml
+    - name: Suntik Izin Akses GPS Latar Belakang (Metode Aman)
+      run: |
         MANIFEST_PATH="android/app/src/main/AndroidManifest.xml"
-        PERMISSIONS="\n    <uses-permission android:name=\"android.permission.ACCESS_COARSE_LOCATION\" />\n    <uses-permission android:name=\"android.permission.ACCESS_FINE_LOCATION\" />\n    <uses-permission android:name=\"android.permission.ACCESS_BACKGROUND_LOCATION\" />"
-        sed -i "/<\/manifest>/i \    $PERMISSIONS" $MANIFEST_PATH
+        
+        # Menggunakan metode penggantian string standar yang jauh lebih aman dari error sintaks server
+        PERMISSIONS='    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />\n    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />\n    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />\n</manifest>'
+        
+        sed -i "s|<\/manifest>|${PERMISSIONS}|g" $MANIFEST_PATH
 
-        # 6. Singkronkan seluruh aset kode HTML ke dalam modul Android
+        # Sinkronisasi akhir ke folder Android
         npx cap sync android
 
     - name: Merakit File APK dengan Gradle Cloud
@@ -56,7 +69,7 @@ jobs:
         chmod +x gradlew
         ./gradlew assembleDebug
 
-    - name: Mengunggah File APK Hasil Rakitan
+    - name: Mengunggah File APK Resmi
       uses: actions/upload-artifact@v4
       with:
         name: CAZ-Tracker-Official-APK
