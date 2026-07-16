@@ -26,41 +26,42 @@ jobs:
 
     - name: Inisialisasi Proyek & Aset Web
       run: |
-        # 1. Pastikan folder www siap dan index.html ada di tempatnya
         mkdir -p www
         if [ -f index.html ]; then
           cp index.html www/
         else
-          echo "ERROR: File index.html tidak ditemukan di root repository kamu!"
+          echo "ERROR: File index.html tidak ditemukan!"
           exit 1
         fi
-
-        # 2. Buat file package.json dasar agar npm tidak error
         echo '{"name": "caz-tracker", "version": "1.0.0", "private": true, "dependencies": {}, "devDependencies": {}}' > package.json
 
-    - name: Instalasi Modul Capacitor
+    - name: Instalasi Modul Capacitor & Pembuat Logo
       run: |
-        # Instal Core, CLI, dan Android secara berurutan dan aman
         npm install @capacitor/core@6 @capacitor/cli@6 @capacitor/android@6
+        npm install -g @capacitor/assets
 
     - name: Konfigurasi & Pembuatan Struktur Android
       run: |
-        # Buat file konfigurasi Capacitor resmi
         echo '{"appId": "com.caz.location.app", "appName": "CAZ Tracker", "webDir": "www"}' > capacitor.config.json
-        
-        # Tambahkan platform Android asli
         npx cap add android
+
+    - name: Pasang Logo Kustom Keluarga CAZ 🚀
+      run: |
+        # Jika file icon.png terdeteksi di GitHub, mesin akan memprosesnya jadi logo APK
+        if [ -f icon.png ]; then
+          echo "Logo icon.png ditemukan! Memulai proses rendering logo..."
+          mkdir -p assets
+          cp icon.png assets/icon.png
+          npx capacitor-assets generate --android
+        else
+          echo "INFO: File icon.png tidak ditemukan. Menggunakan logo default bawaan Capacitor."
+        fi
 
     - name: Suntik Izin Akses GPS Latar Belakang (Metode Aman)
       run: |
         MANIFEST_PATH="android/app/src/main/AndroidManifest.xml"
-        
-        # Menggunakan metode penggantian string standar yang jauh lebih aman dari error sintaks server
         PERMISSIONS='    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />\n    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />\n    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />\n</manifest>'
-        
         sed -i "s|<\/manifest>|${PERMISSIONS}|g" $MANIFEST_PATH
-
-        # Sinkronisasi akhir ke folder Android
         npx cap sync android
 
     - name: Merakit File APK dengan Gradle Cloud
