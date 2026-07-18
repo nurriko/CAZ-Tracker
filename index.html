@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CAZ Tracker - Ultimate Map View</title>
+    <title>CAZ Tracker - Ultimate Family Hub</title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet" />
     <style>
@@ -62,7 +62,7 @@
         .user-chip.active { background: linear-gradient(135deg, #0284c7, #3b82f6); color: #fff; border-color: transparent; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); }
 
         .map-wrapper { position: relative; width: 100%; height: 380px; border-radius: 24px; overflow: hidden; border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-        #map { height: 100%; width: 100%; background: #e5e7eb; }
+        #map { height: 100%; width: 100%; background: #e5e7eb; transition: background 0.3s; }
         .custom-emoji-marker { background: #1e293b; border: 3px solid #38bdf8; border-radius: 50%; width: 46px !important; height: 46px !important; display: flex; justify-content: center; align-items: center; font-size: 24px; box-shadow: 0 6px 20px rgba(0,0,0,0.5); overflow: hidden; cursor: pointer; }
         .custom-emoji-marker img { width: 100%; height: 100%; object-fit: cover; }
         .maplibregl-popup-content { background: rgba(30, 41, 59, 0.95) !important; color: #f1f5f9 !important; border-radius: 14px !important; border: 1px solid rgba(56, 189, 248, 0.4) !important; box-shadow: 0 8px 20px rgba(0,0,0,0.4) !important; font-family: 'Nunito', sans-serif !important; padding: 12px 15px !important; font-size: 13px !important; text-align: center; }
@@ -90,6 +90,7 @@
         .btn-quick-status { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #38bdf8; padding: 6px 12px; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; width: auto; box-shadow: none; }
         .btn-small { padding: 6px 10px; font-size: 12px; border-radius: 10px; width: auto; border: none; cursor: pointer; color: white; font-weight: 700; }
 
+        /* === GAME MENU STYLES === */
         .game-menu-btn { margin-bottom: 15px; padding: 20px; font-size: 18px; border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;}
         .xoxo-wrapper { background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 15px; text-align: center; margin-bottom: 15px;}
         .xoxo-header { font-size: 18px; color: #38bdf8; font-weight: 800; margin-bottom: 10px; text-transform: uppercase; }
@@ -104,6 +105,7 @@
         .podium-1 { height: 100px; border-color: #eab308; } .podium-2 { height: 75px; border-color: #94a3b8; } .podium-3 { height: 50px; border-color: #d97706; }
         .podium-avatar { position: absolute; top: -35px; left: 50%; transform: translateX(-50%); font-size: 28px; }
 
+        /* TOAST & ANIMATIONS */
         #toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; width: 90%; max-width: 380px; pointer-events: none; }
         .toast-msg { padding: 16px 20px; border-radius: 16px; margin-bottom: 10px; color: white; font-weight: 700; font-size: 14px; text-align: center; border: 1px solid rgba(255,255,255,0.1); animation: toastSlide 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         .toast-msg.success { background: linear-gradient(to right, #10b981, #059669); }
@@ -158,7 +160,11 @@
         </div>
 
         <div id="tab-peta" class="tab-content active">
-            <div class="map-user-selector" id="map-jumper-list"><button id="jumper-all" class="user-chip active" onclick="focusMap('all')">🌍 Lihat Semua</button><button id="jumper-me" class="user-chip" onclick="focusMap('me')">👦 Saya</button></div>
+            <div class="map-user-selector" id="map-jumper-list">
+                <button id="jumper-all" class="user-chip active" onclick="focusMap('all')">🌍 Semua</button>
+                <button id="jumper-me" class="user-chip" onclick="focusMap('me')">👦 Saya</button>
+                <button id="btn-toggle-map" class="user-chip" onclick="toggleMapStyle()" style="margin-left:auto; background: rgba(15, 23, 42, 0.6); color: #94a3b8; border-color: transparent;">🌙 Malam</button>
+            </div>
             <div class="map-wrapper"><div id="map"></div></div>
             <div class="accordion-header" onclick="toggleGeofenceUI()"><h4 style="margin:0; font-size:15px; color:#38bdf8;">📍 Kelola Tempat Kustom Saya</h4><span id="geofence-icon" style="color:#94a3b8; font-size:12px;">▼ Buka</span></div>
             <div id="geofence-content" class="accordion-content hidden">
@@ -207,23 +213,52 @@
                 
                 <div class="xoxo-wrapper" style="border-color:#10b981;">
                     <h3 style="color:#10b981; margin-bottom:5px;">🤔 Tebak Kata CAZ</h3>
-                    <p style="font-size:12px; color:#94a3b8; margin-top:0;">1 Menit / Soal. Siapa Cepat Dia Dapat!</p>
+                    <p style="font-size:12px; color:#94a3b8; margin-top:0;">1 Menit / Soal. Jawab Cepat di Kolom!</p>
                     
-                    <div style="background: rgba(0,0,0,0.3); border-radius: 12px; padding: 10px; margin-bottom: 15px;">
-                        <b style="font-size:13px; color:#38bdf8;">Pemain di Ruangan:</b>
+                    <!-- LOBBY SETTINGS TEBAK KATA -->
+                    <div id="tebak-lobby-settings" style="background: rgba(0,0,0,0.3); border-radius: 12px; padding: 15px; margin-bottom: 15px;">
+                        <div class="form-group">
+                            <label style="color:#10b981;">Kapasitas Pemain:</label>
+                            <select id="tebak-setting-players">
+                                <option value="1">1 Pemain (Main Sendiri)</option>
+                                <option value="2">2 Pemain (Duel)</option>
+                                <option value="3">3 Pemain</option>
+                                <option value="4">4 Pemain</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label style="color:#10b981;">Jumlah Soal:</label>
+                            <select id="tebak-setting-questions">
+                                <option value="5">5 Pertanyaan</option>
+                                <option value="10">10 Pertanyaan</option>
+                                <option value="15">15 Pertanyaan</option>
+                            </select>
+                        </div>
+                        <b style="font-size:13px; color:#38bdf8; display:block; margin-top:10px;">Pemain di Ruangan:</b>
                         <div id="tebak-player-list" style="margin-top: 8px; font-size:14px; min-height: 20px;"></div>
-                        <button id="btn-tebak-ready" style="margin-top:10px; padding:8px; background:#3b82f6; font-size:13px;">Gabung & Ready ✔️</button>
+                        <button id="btn-tebak-ready" style="margin-top:10px; padding:10px; background:#3b82f6; font-size:14px; width:100%;">Buat Room & Ready ✔️</button>
                     </div>
 
-                    <div id="tebak-soal-display" style="font-size:24px; padding:15px 10px; font-weight:800; background:rgba(0,0,0,0.3); border-radius:12px; margin-bottom:15px;">
-                        Menunggu pemain siap...
+                    <!-- PLAYING AREA TEBAK KATA -->
+                    <div id="tebak-playing-area" class="hidden">
+                        <div style="font-size:12px; color:#eab308; margin-bottom:8px; font-weight:bold;" id="tebak-progress-info">Soal 1 / 5</div>
+                        <div id="tebak-soal-display" style="font-size:24px; padding:15px 10px; font-weight:800; background:rgba(0,0,0,0.3); border-radius:12px; margin-bottom:15px;">Loading...</div>
+                        <div id="tebak-timer-display" style="font-size:13px; color:#ef4444; margin-bottom:10px; font-weight:bold;"></div>
+
+                        <div style="display:flex; gap:8px; margin-bottom:15px;">
+                            <input type="text" id="tebak-input-jawaban" placeholder="Ketik jawabanmu di sini..." style="flex:1; padding:12px; border-radius:12px; border:1px solid rgba(255,255,255,0.1); background:rgba(15,23,42,0.6); color:white;">
+                            <button onclick="submitJawabanTebak()" style="width:auto; padding:12px 18px; border-radius:12px; background:#10b981;">Kirim</button>
+                        </div>
+                        
+                        <!-- TOMBOL STOP PERMAINAN OLEH HOST -->
+                        <button id="btn-tebak-stop" class="hidden" style="width:100%; padding:10px; background:#ef4444; font-size:13px; border-radius:12px;">Hentikan Permainan 🛑</button>
                     </div>
                     
-                    <div id="tebak-timer-display" style="font-size:13px; color:#ef4444; margin-bottom:10px; font-weight:bold;"></div>
-
-                    <div style="display:flex; gap:8px; margin-bottom:5px;">
-                        <input type="text" id="tebak-input-jawaban" placeholder="Ketik jawabanmu di sini..." style="flex:1; padding:12px; border-radius:12px; border:1px solid rgba(255,255,255,0.1); background:rgba(15,23,42,0.6); color:white;">
-                        <button onclick="submitJawabanTebak()" style="width:auto; padding:12px 18px; border-radius:12px; background:#10b981;">Kirim</button>
+                    <!-- KLASEMEN TEBAK KATA -->
+                    <div id="tebak-finished-screen" class="hidden" style="margin-top:20px;">
+                        <h3 style="color:#eab308; margin-bottom:15px;">🏆 KLASEMEN TEBAK KATA 🏆</h3>
+                        <div id="tebak-leaderboard" style="text-align:left; background:rgba(0,0,0,0.3); padding:15px; border-radius:12px; font-size:15px; margin-bottom:15px;"></div>
+                        <button id="btn-tebak-reset" style="background:#ef4444; padding:10px; font-size:14px;">Kembali ke Lobby 🔄</button>
                     </div>
                 </div>
             </div>
@@ -254,7 +289,7 @@
                     </div>
                     
                     <div id="xoxo-pvp-info" style="background: rgba(0,0,0,0.3); border-radius: 12px; padding: 10px; margin-bottom: 15px;">
-                        <b style="font-size:13px; color:#38bdf8;">Di Ruang Tunggu (Bisa Berdua atau Berempat):</b>
+                        <b style="font-size:13px; color:#38bdf8;">Di Ruang Tunggu:</b>
                         <div id="xoxo-player-list" style="margin-top: 8px; font-size:14px; min-height: 40px;"></div>
                     </div>
 
@@ -291,7 +326,7 @@
                 <div style="background: rgba(56, 189, 248, 0.1); border: 1px dashed #38bdf8; border-radius: 12px; padding: 10px; text-align: center; margin-bottom: 15px;"><span style="font-size: 12px; color: #94a3b8; font-weight: 700;">Gelar Kebiasaan Kamu Pekan Ini:</span><br><b id="my-badge-title" style="color: #eab308; font-size: 15px;">🚀 Menghitung Medali...</b></div>
                 
                 <div class="form-group" style="display:flex; justify-content:space-between; align-items:center; background: rgba(0,0,0,0.2); padding: 12px; border-radius: 12px;">
-                    <label style="margin:0;">Suara Notifikasi Aplikasi 🔔</label>
+                    <label style="margin:0;">Suara Notifikasi 🔔</label>
                     <button id="btn-toggle-sound" style="width:auto; padding:8px 16px; font-size:12px; background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981;">Nyala</button>
                 </div>
 
@@ -299,6 +334,11 @@
                 <div class="form-group"><label>Pilih Opsi Avatar Emoji</label><select id="profile-edit-emoji"><option value="">-- Pertahankan Gambar Saat Ini --</option><option value="🐱">🐱 Kucing Oren</option><option value="🐰">🐰 Kelinci Imut</option><option value="🐻">🐻 Beruang Santai</option><option value="🦊">🦊 Rubah Pintar</option><option value="🐼">🐼 Panda Mengantuk</option><option value="🐥">🐥 Anak Ayam Ceria</option></select></div>
                 <div class="form-group"><label>Atau Upload Foto Galeri Pribadi 📸</label><input type="file" id="profile-photo-upload" accept="image/*" style="padding:10px; font-size:12px;"></div>
                 <button id="btn-save-profile" style="margin-top:10px;">Simpan Perubahan Profil 💾</button>
+            </div>
+            
+            <div id="admin-panel-container" class="hidden">
+                <h4 style="color:#eab308;">👑 Kontrol Pengguna (Superadmin)</h4>
+                <div id="admin-all-users-list" class="list-container" style="max-height:360px;"></div>
             </div>
         </div>
 
@@ -317,13 +357,30 @@
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, collection, query, where, getDocs, onSnapshot, addDoc, orderBy, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        const firebaseConfig = { apiKey: "AIzaSyCkCS0wpcYdO7T80wDyorl6dKxvKW50Y3c", authDomain: "caz-location.firebaseapp.com", databaseURL: "https://caz-location-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "caz-location", storageBucket: "caz-location.firebasestorage.app", messagingSenderId: "221858254329", appId: "1:221858254329:web:73d2ea93ddb566199d0128" };
-        const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getFirestore(app);
+        // ==========================================
+        // CONFIG FIREBASE
+        // ==========================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyCkCS0wpcYdO7T80wDyorl6dKxvKW50Y3c",
+            authDomain: "caz-location.firebaseapp.com",
+            databaseURL: "https://caz-location-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "caz-location",
+            storageBucket: "caz-location.firebasestorage.app",
+            messagingSenderId: "221858254329",
+            appId: "1:221858254329:web:73d2ea93ddb566199d0128"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
         let currentUserData = null; let mapData = null; let myMarker = null; let friendMarkers = {};
         let activeChatFriendId = "group_global"; let unsubscribeChat = null;
         let activeTabId = "tab-peta"; let myLatestLat = null; let myLatestLng = null; let lastTrackTime = null; let myCustomPlaces = []; let friendLastStatuses = {};
         let localBatteryLevel = 100; let localIsCharging = false; let initialMapFitDone = false;
+        
+        // PETA WARNA CERAH DEFAULT
+        let isMapDark = false;
 
         // SOUND SETTINGS
         let isSoundMuted = localStorage.getItem('caz_muted') === 'true';
@@ -336,18 +393,19 @@
             soundBtn.style.background = isSoundMuted ? "rgba(239, 68, 68, 0.2)" : "rgba(16, 185, 129, 0.2)";
         }
         updateSoundBtnUI();
-        if(soundBtn) {
-            soundBtn.onclick = () => {
-                isSoundMuted = !isSoundMuted; localStorage.setItem('caz_muted', isSoundMuted);
-                updateSoundBtnUI(); if(!isSoundMuted) playCuteDing();
-            };
-        }
+        if(soundBtn) { soundBtn.onclick = () => { isSoundMuted = !isSoundMuted; localStorage.setItem('caz_muted', isSoundMuted); updateSoundBtnUI(); if(!isSoundMuted) playCuteDing(); }; }
 
         window.showGame = function(gameId) {
             document.getElementById('game-menu-screen').classList.add('hidden'); document.getElementById('game-tebak-screen').classList.add('hidden'); document.getElementById('game-xoxo-screen').classList.add('hidden');
             if(gameId === 'menu') document.getElementById('game-menu-screen').classList.remove('hidden');
             if(gameId === 'tebak') document.getElementById('game-tebak-screen').classList.remove('hidden');
             if(gameId === 'xoxo') document.getElementById('game-xoxo-screen').classList.remove('hidden');
+        };
+
+        window.toggleMapStyle = () => {
+            if(!mapData) return; isMapDark = !isMapDark;
+            mapData.setStyle(isMapDark ? 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json' : 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json');
+            const btn = document.getElementById('btn-toggle-map'); btn.innerHTML = isMapDark ? "🌞 Siang" : "🌙 Malam"; btn.style.background = isMapDark ? "rgba(56, 189, 248, 0.2)" : "rgba(15, 23, 42, 0.6)";
         };
 
         window.toggleGeofenceUI = function() { const c = document.getElementById('geofence-content'); const i = document.getElementById('geofence-icon'); if(c.classList.contains('hidden')) { c.classList.remove('hidden'); i.innerText = "▲ Tutup"; } else { c.classList.add('hidden'); i.innerText = "▼ Buka"; } };
@@ -367,6 +425,8 @@
         };
 
         function playCuteDing() { if(isSoundMuted) return; try { const ctx = new (window.AudioContext || window.webkitAudioContext)(); const osc = ctx.createOscillator(); const gain = ctx.createGain(); osc.connect(gain); gain.connect(ctx.destination); osc.type = 'sine'; osc.frequency.setValueAtTime(587.33, ctx.currentTime); osc.frequency.setValueAtTime(880, ctx.currentTime + 0.08); gain.gain.setValueAtTime(0.2, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3); osc.start(); osc.stop(ctx.currentTime + 0.3); } catch(e) {} }
+        function playPokeSound() { if(isSoundMuted) return; try { const ctx = new (window.AudioContext || window.webkitAudioContext)(); const osc = ctx.createOscillator(); const gain = ctx.createGain(); osc.connect(gain); gain.connect(ctx.destination); osc.type = 'triangle'; osc.frequency.setValueAtTime(300, ctx.currentTime); osc.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 0.4); gain.gain.setValueAtTime(0.4, ctx.currentTime); gain.gain.linearRampToValueAtTime(0.01, ctx.currentTime + 0.4); osc.start(); osc.stop(ctx.currentTime + 0.4); } catch(e) {} }
+
         window.launchToast = function(message, type = "success") { const container = document.getElementById('toast-container'); const toast = document.createElement('div'); toast.className = `toast-msg ${type}`; toast.innerText = message; container.appendChild(toast); setTimeout(() => { toast.style.animation = "appLaunch 0.3s ease-in reverse forwards"; setTimeout(() => toast.remove(), 300); }, 3500); };
         function renderAvatarHtml(avatarStr) { if (avatarStr && avatarStr.startsWith("data:image")) { return `<img src="${avatarStr}" style="width:34px; height:34px; border-radius:50%; object-fit:cover; border:2px solid #38bdf8; display:inline-block; vertical-align:middle;">`; } return `<span style="font-size:22px; vertical-align:middle; display:inline-block;">${avatarStr || '📍'}</span>`; }
         function extractEmoji(avatarStr) { if (avatarStr && avatarStr.startsWith("data:image")) { return "🖼️"; } return avatarStr || "📍"; }
@@ -420,10 +480,11 @@
                 loginSec.classList.add('hidden'); registerSec.classList.add('hidden'); dashboardSec.classList.remove('hidden'); currentUserData = userDoc.data();
                 document.getElementById('user-display-name').innerText = currentUserData.nama; document.getElementById('my-avatar-display').innerHTML = renderAvatarHtml(currentUserData.avatar); document.getElementById('profile-edit-name').value = currentUserData.nama;
 
-                initMap(); listenToMyCustomPlaces(); startLocationTracking(); listenToFriendsListAndLocations();
+                initMap(); listenToMyCustomPlaces(); startLocationTracking(); listenToFriendsListAndLocations(); listenToMyIncomingPokes();
                 loadChatRoom(); listenToLiveChatNotification(); initXoxoTournamentListener(); initTebakGambarListener();
 
                 if ("Notification" in window && Notification.permission !== "granted") { Notification.requestPermission(); }
+                if(currentUserData.role === "superadmin") { document.getElementById('admin-panel-container').classList.remove('hidden'); listenToAllUsersForAdmin(); }
             } else { loginSec.classList.remove('hidden'); dashboardSec.classList.add('hidden'); }
         });
 
@@ -450,7 +511,7 @@
         window.deleteCustomPlace = async function(placeId) { if(!confirm("Hapus lokasi geofence kustom ini?")) return; await deleteDoc(doc(db, "users", auth.currentUser.uid, "custom_places", placeId)); launchToast("Lokasi dihapus.", "success"); };
 
         function initMap() {
-            if(!mapData) { mapData = new maplibregl.Map({ container: 'map', style: { 'version': 8, 'sources': { 'osm': { 'type': 'raster', 'tiles': ['https://a.tile.openstreetmap.org/{z}/{x}/{y}.png', 'https://b.tile.openstreetmap.org/{z}/{x}/{y}.png', 'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png'], 'tileSize': 256, 'attribution': '&copy; OpenStreetMap' } }, 'layers': [{ 'id': 'osm-layer', 'type': 'raster', 'source': 'osm' }] }, center: [106.8456, -6.2088], zoom: 13, pitchWithRotate: true, dragRotate: true, touchZoomRotate: true }); mapData.addControl(new maplibregl.NavigationControl({ showZoom: false, showCompass: true, visualizePitch: true }), 'top-right'); }
+            if(!mapData) { mapData = new maplibregl.Map({ container: 'map', style: 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json', center: [106.8456, -6.2088], zoom: 13, pitchWithRotate: true, dragRotate: true, touchZoomRotate: true }); mapData.addControl(new maplibregl.NavigationControl({ showZoom: false, showCompass: true, visualizePitch: true }), 'top-right'); }
         }
 
         function getSpeedEmoji(speedMps) { if (!speedMps || speedMps < 0.3) return "🛌 Kaum Rebahan"; if (speedMps <= 2.5) return "🐢 Jalan Santai"; return "🏎️ Berkendara/Ngebut"; }
@@ -480,13 +541,13 @@
 
         function listenToFriendsListAndLocations() {
             onSnapshot(collection(db, "users", auth.currentUser.uid, "contacts"), (snapshot) => {
-                const friendListDiv = document.getElementById('friend-list'); friendListDiv.innerHTML = ""; const jumperList = document.getElementById('map-jumper-list'); Array.from(jumperList.children).forEach(child => { if(child.id !== 'jumper-all' && child.id !== 'jumper-me') child.remove(); });
+                const friendListDiv = document.getElementById('friend-list'); friendListDiv.innerHTML = ""; const jumperList = document.getElementById('map-jumper-list'); Array.from(jumperList.children).forEach(child => { if(child.id !== 'jumper-all' && child.id !== 'jumper-me' && child.id !== 'btn-toggle-map') child.remove(); });
                 if(snapshot.empty) friendListDiv.innerHTML = "<p style='color:#64748b;text-align:center;font-size:13px;'>Belum ada anggota dipantau.</p>";
 
                 snapshot.forEach((contactDoc) => {
                     const friend = contactDoc.data(); const card = document.createElement('div'); card.className = "item-card";
                     card.innerHTML = `<div style="display:flex; align-items:center; gap:10px;"><div id="friend-avatar-card-${friend.uid}"></div><div><b>${friend.nama}</b> <span class="badge ${friend.kategori}">${friend.kategori}</span><br><small id="status-zone-${friend.uid}" style="color:#38bdf8;font-weight:700;">🚀 Melacak...</small></div></div>`; friendListDiv.appendChild(card);
-                    const jumperBtn = document.createElement('button'); jumperBtn.className = "user-chip"; jumperBtn.id = `jumper-friend-${friend.uid}`; jumperBtn.onclick = () => focusMap(friend.uid); jumperBtn.innerHTML = `👤 ${friend.nama.split(' ')[0]}`; jumperList.appendChild(jumperBtn);
+                    const jumperBtn = document.createElement('button'); jumperBtn.className = "user-chip"; jumperBtn.id = `jumper-friend-${friend.uid}`; jumperBtn.onclick = () => focusMap(friend.uid); jumperBtn.innerHTML = `👤 ${friend.nama.split(' ')[0]}`; jumperList.insertBefore(jumperBtn, document.getElementById('btn-toggle-map'));
                     if (!document.querySelector(`#chat-select-user option[value="${friend.uid}"]`)) { const opt = document.createElement('option'); opt.value = friend.uid; opt.innerText = `Layar Pribadi: ${friend.nama}`; document.getElementById('chat-select-user').appendChild(opt); }
 
                     onSnapshot(doc(db, "locations", friend.uid), (locDoc) => {
@@ -494,7 +555,6 @@
                             const loc = locDoc.data(); const newZone = loc.statusZone || "🚀 Luar Area"; const oldZone = friendLastStatuses[friend.uid];
                             if(oldZone && oldZone !== newZone) { launchToast(`📢 ${loc.nama} telah tiba di ${newZone}!`, "success"); playCuteDing(); } friendLastStatuses[friend.uid] = newZone;
                             
-                            // ONLINE OFFLINE LOGIC
                             const now = Date.now(); const isOnline = (now - loc.last_update) < 180000; const dotClass = isOnline ? 'online-dot' : 'offline-dot';
                             
                             document.getElementById(`jumper-friend-${friend.uid}`).innerHTML = `${extractEmoji(loc.avatar)} ${friend.nama.split(' ')[0]}`; 
@@ -503,6 +563,17 @@
                             const popupText = `<b>${loc.nama}</b><br>${newZone}<br>${loc.speedText || '🛌 Menetap'}<br>🔋 ${loc.battery}%`; friendMarkers[friend.uid] = updateMapMarker(friendMarkers[friend.uid], loc.lat, loc.lng, loc.avatar, popupText);
                         }
                     });
+                });
+            });
+        }
+
+        function listenToMyIncomingPokes() {
+            onSnapshot(collection(db, "users", auth.currentUser.uid, "incoming_pokes"), (snapshot) => {
+                snapshot.docChanges().forEach(async (change) => {
+                    if (change.type === "added") {
+                        const data = change.doc.data(); document.body.classList.add('shake-screen'); playPokeSound(); launchToast(`👉 KELUARGA: Kamu dicolek oleh ${data.pengirim}!`, "danger");
+                        setTimeout(() => { document.body.classList.remove('shake-screen'); }, 800); await deleteDoc(doc(db, "users", auth.currentUser.uid, "incoming_pokes", change.doc.id));
+                    }
                 });
             });
         }
@@ -562,55 +633,106 @@
         /* === GAME 1: TEBAK GAMBAR REBUS === */
         let tebakDocRef = doc(db, "games", "tebak_gambar");
         let currentTebakanState = null;
-        let tebakTimerInterval = null;
         
         const bankSoal = [
             { q: "Ber + 💰", a: "Beruang" }, { q: "Mata + 🌞", a: "Matahari" }, { q: "Buku + 🦿(Kaki/Lapak)", a: "Bukalapak" }, 
             { q: "Kacang + 🌲", a: "Kacang panjang" }, { q: "Jambu + 🗿", a: "Jambu batu" }, { q: "Jam + 🍄", a: "Jamur" },
             { q: "Air + 💧", a: "Air terjun" }, { q: "Tangan + ✋", a: "Tangan kanan" }, { q: "Es + 🏃‍♂️", a: "Aespa" },
             { q: "A + 👕 + Z", a: "Ateez" }, { q: "👶 + 👹", a: "Baby Monster" }, { q: "🎾 + 😁", a: "Happy Hitters" },
-            { q: "👗 + 📈", a: "Dashboard Sales" }, { q: "👨‍🏫 + 🎒 + ✈️", a: "My Trip" }
+            { q: "👗 + 📈", a: "Dashboard Sales" }, { q: "👨‍🏫 + 🎒 + ✈️", a: "My Trip" },
+            { q: "Kembang + 👞", a: "Kembang sepatu" }, { q: "Kuda + 🌊", a: "Kuda nil" }, { q: "Bintang + 🐟", a: "Bintang laut" },
+            { q: "Sapi + 🧹", a: "Sapu" }, { q: "Malam + 🦇", a: "Kelelawar" }, { q: "Rumah + 🏥", a: "Rumah sakit" },
+            { q: "Tanda + ✍️", a: "Tanda tangan" }, { q: "Buah + 🐉", a: "Buah naga" }, { q: "Kereta + 🚂", a: "Kereta api" },
+            { q: "Kapal + ✈️", a: "Kapal terbang" }, { q: "Lampu + 🔴🟡🟢", a: "Lampu merah" }, { q: "Kaca + 👓", a: "Kacamata" },
+            { q: "Raja + 🦁", a: "Singa" }, { q: "Anak + 🔑", a: "Anak kunci" }, { q: "Ibu + 🏙️", a: "Ibu kota" },
+            { q: "Batu + 🔋", a: "Batu baterai" }, { q: "Uang + 🪙", a: "Uang logam" }, { q: "Surat + 📰", a: "Surat kabar" },
+            { q: "Gunung + 🌋", a: "Gunung berapi" }, { q: "Hutan + 🌧️", a: "Hutan hujan" }, { q: "Cahaya + 💡", a: "Cahaya lampu" }
         ];
 
         function initTebakGambarListener() {
             onSnapshot(tebakDocRef, (snap) => {
-                if(!snap.exists()) { setDoc(tebakDocRef, { status: "lobby", players: [], soal: "", jawaban: "", deadline: 0, countdown_end: 0 }); return; }
-                currentTebakanState = snap.data();
-                renderTebakanUI();
+                if(!snap.exists()) { setDoc(tebakDocRef, { status: "lobby", players: [], soal: "", jawaban: "", deadline: 0, countdown_end: 0, maxPlayers: 2, maxQuestions: 5, currentQuestionIndex: 0 }); return; }
+                currentTebakanState = snap.data(); renderTebakanUI();
             });
         }
         
         function renderTebakanUI() {
+            if(!currentTebakanState) return;
+            const lobbySettings = document.getElementById('tebak-lobby-settings');
+            const playingArea = document.getElementById('tebak-playing-area');
+            const finishedScreen = document.getElementById('tebak-finished-screen');
             const listPemain = document.getElementById('tebak-player-list');
-            listPemain.innerHTML = currentTebakanState.players.map(p => `<span class="badge ${p.ready ? 'Keluarga' : ''}">${p.name} ${p.ready ? '✔️' : '⏳'}</span>`).join(" ");
-            
             const btnReady = document.getElementById('btn-tebak-ready');
-            const myPlayer = currentTebakanState.players.find(p => p.uid === auth.currentUser.uid);
-            if(myPlayer) {
-                btnReady.innerText = myPlayer.ready ? "Tunggu pemain lain..." : "Set Siap ✔️";
-                btnReady.disabled = myPlayer.ready;
-            }
-
+            const btnStop = document.getElementById('btn-tebak-stop');
+            
+            const pList = currentTebakanState.players || [];
+            listPemain.innerHTML = pList.map(p => `<span class="badge ${p.ready ? 'Keluarga' : ''}">${p.name} ${p.ready ? '✔️' : '⏳'}</span>`).join(" ");
+            
+            const myPlayer = pList.find(p => p.uid === auth.currentUser.uid);
+            const isHost = (pList.length === 0 || pList[0].uid === auth.currentUser.uid);
+            
             if(currentTebakanState.status === "lobby") {
-                document.getElementById('tebak-soal-display').innerText = "Menunggu pemain siap...";
-                document.getElementById('tebak-timer-display').innerText = "";
-            } else if (currentTebakanState.status === "playing") {
-                document.getElementById('tebak-soal-display').innerText = currentTebakanState.soal + " = ?";
-            } else if (currentTebakanState.status === "countdown") {
-                document.getElementById('tebak-soal-display').innerText = currentTebakanState.soal;
+                lobbySettings.classList.remove('hidden'); playingArea.classList.add('hidden'); finishedScreen.classList.add('hidden');
+                
+                if(isHost) {
+                    document.getElementById('tebak-setting-players').disabled = false;
+                    document.getElementById('tebak-setting-questions').disabled = false;
+                    btnReady.innerText = myPlayer && myPlayer.ready ? "Menunggu pemain lain..." : "Buat Room & Ready ✔️";
+                } else {
+                    document.getElementById('tebak-setting-players').disabled = true;
+                    document.getElementById('tebak-setting-questions').disabled = true;
+                    btnReady.innerText = myPlayer && myPlayer.ready ? "Menunggu Host..." : "Gabung & Ready ✔️";
+                }
+                btnReady.disabled = myPlayer && myPlayer.ready;
+
+            } else if (currentTebakanState.status === "finished") {
+                lobbySettings.classList.add('hidden'); playingArea.classList.add('hidden'); finishedScreen.classList.remove('hidden');
+                let sortedPlayers = [...pList].sort((a,b) => b.score - a.score);
+                document.getElementById('tebak-leaderboard').innerHTML = sortedPlayers.map((p, i) => `<b>#${i+1} ${p.name}</b> - ${p.score} Poin<br>`).join("");
+            } else {
+                lobbySettings.classList.add('hidden'); playingArea.classList.remove('hidden'); finishedScreen.classList.add('hidden');
+                document.getElementById('tebak-progress-info').innerText = `Soal ${currentTebakanState.currentQuestionIndex} / ${currentTebakanState.maxQuestions}`;
+                
+                if (isHost) { btnStop.classList.remove('hidden'); } else { btnStop.classList.add('hidden'); }
+
+                if (currentTebakanState.status === "playing") { document.getElementById('tebak-soal-display').innerText = currentTebakanState.soal + " = ?"; } 
+                else if (currentTebakanState.status === "countdown") { document.getElementById('tebak-soal-display').innerText = currentTebakanState.soal; }
             }
         }
 
+        document.getElementById('btn-tebak-stop').onclick = async () => {
+            if(!confirm("Anda yakin ingin menghentikan permainan dan kembali ke Lobby?")) return;
+            await updateDoc(tebakDocRef, { status: "lobby", players: [], soal: "", jawaban: "", currentQuestionIndex: 0 });
+            launchToast("Permainan dihentikan oleh Host.", "warning");
+        };
+
         document.getElementById('btn-tebak-ready').onclick = async () => {
-            let players = [...currentTebakanState.players];
-            let me = players.find(p => p.uid === auth.currentUser.uid);
-            if(!me) { players.push({ uid: auth.currentUser.uid, name: currentUserData.nama.split(' ')[0], ready: true }); } 
-            else { me.ready = true; }
+            if(!currentTebakanState) return launchToast("Menghubungkan ke server...", "warning");
+            let players = currentTebakanState.players ? [...currentTebakanState.players] : [];
+            let meIdx = players.findIndex(p => p.uid === auth.currentUser.uid);
             
-            if(players.length > 0 && players.every(p => p.ready)) {
+            let maxP = currentTebakanState.maxPlayers || 2;
+            let maxQ = currentTebakanState.maxQuestions || 5;
+            if(players.length === 0 || players[0].uid === auth.currentUser.uid) {
+                maxP = parseInt(document.getElementById('tebak-setting-players').value);
+                maxQ = parseInt(document.getElementById('tebak-setting-questions').value);
+            }
+
+            if(meIdx === -1) { players.push({ uid: auth.currentUser.uid, name: currentUserData.nama.split(' ')[0], score: 0, ready: true }); } 
+            else { players[meIdx].ready = true; }
+            
+            let readyCount = players.filter(p => p.ready).length;
+            
+            if(readyCount >= maxP) {
                 const randomSoal = bankSoal[Math.floor(Math.random() * bankSoal.length)];
-                await updateDoc(tebakDocRef, { status: "playing", players: players, soal: randomSoal.q, jawaban: randomSoal.a, deadline: Date.now() + 60000 });
-            } else { await updateDoc(tebakDocRef, { players: players }); }
+                await updateDoc(tebakDocRef, { status: "playing", players: players, maxPlayers: maxP, maxQuestions: maxQ, currentQuestionIndex: 1, soal: randomSoal.q, jawaban: randomSoal.a, deadline: Date.now() + 60000 });
+            } else { 
+                await updateDoc(tebakDocRef, { players: players, maxPlayers: maxP, maxQuestions: maxQ }); 
+            }
+        };
+
+        document.getElementById('btn-tebak-reset').onclick = async () => {
+            await updateDoc(tebakDocRef, { status: "lobby", players: [], soal: "", jawaban: "", currentQuestionIndex: 0 });
         };
 
         setInterval(async () => {
@@ -621,17 +743,18 @@
                 if(timeLeft > 0) { document.getElementById('tebak-timer-display').innerText = `Sisa Waktu: ${timeLeft} detik`; } 
                 else {
                     document.getElementById('tebak-timer-display').innerText = "Waktu Habis!";
-                    if(currentTebakanState.players[0].uid === auth.currentUser.uid) {
-                        await updateDoc(tebakDocRef, { status: "countdown", soal: `Waktu Habis! Jawabannya: ${currentTebakanState.jawaban}`, countdown_end: now + 5000 });
+                    if(currentTebakanState.players[0] && currentTebakanState.players[0].uid === auth.currentUser.uid) {
+                        let nextStatus = currentTebakanState.currentQuestionIndex >= currentTebakanState.maxQuestions ? "finished" : "countdown";
+                        await updateDoc(tebakDocRef, { status: nextStatus, soal: `Waktu Habis! Jawab: ${currentTebakanState.jawaban}`, countdown_end: now + 5000 });
                     }
                 }
             } else if (currentTebakanState.status === "countdown") {
                 let countLeft = Math.floor((currentTebakanState.countdown_end - now) / 1000);
                 if(countLeft > 0) { document.getElementById('tebak-timer-display').innerText = `Soal berikutnya dalam ${countLeft}...`; }
                 else {
-                    if(currentTebakanState.players[0].uid === auth.currentUser.uid) {
+                    if(currentTebakanState.players[0] && currentTebakanState.players[0].uid === auth.currentUser.uid) {
                         const randomSoal = bankSoal[Math.floor(Math.random() * bankSoal.length)];
-                        await updateDoc(tebakDocRef, { status: "playing", soal: randomSoal.q, jawaban: randomSoal.a, deadline: now + 60000 });
+                        await updateDoc(tebakDocRef, { status: "playing", currentQuestionIndex: currentTebakanState.currentQuestionIndex + 1, soal: randomSoal.q, jawaban: randomSoal.a, deadline: now + 60000 });
                     }
                 }
             }
@@ -642,8 +765,14 @@
             if(!ans) return; document.getElementById('tebak-input-jawaban').value = "";
             if(currentTebakanState && currentTebakanState.status === "playing") {
                 if(ans === currentTebakanState.jawaban.toLowerCase()) {
-                    await updateDoc(tebakDocRef, { status: "countdown", soal: `🎉 Benar! ${currentUserData.nama} menjawab: ${currentTebakanState.jawaban.toUpperCase()}`, countdown_end: Date.now() + 5000 }); 
-                    launchToast("Jawabanmu Benar!", "success"); playCuteDing();
+                    let players = [...currentTebakanState.players];
+                    let meIdx = players.findIndex(p => p.uid === auth.currentUser.uid);
+                    if(meIdx !== -1) players[meIdx].score += 1;
+                    
+                    let nextStatus = currentTebakanState.currentQuestionIndex >= currentTebakanState.maxQuestions ? "finished" : "countdown";
+                    
+                    await updateDoc(tebakDocRef, { status: nextStatus, players: players, soal: `🎉 ${currentUserData.nama.split(' ')[0]} Benar! Jawabannya: ${currentTebakanState.jawaban.toUpperCase()}`, countdown_end: Date.now() + 5000 }); 
+                    launchToast("+1 Poin!", "success"); playCuteDing();
                 } else { launchToast("Tetot! Jawaban salah.", "danger"); }
             }
         };
@@ -672,14 +801,22 @@
         };
 
         document.getElementById('btn-xoxo-join').onclick = async () => {
-            if(!currentXoxoState || currentXoxoState.status !== "lobby") return launchToast("Permainan sedang berjalan!", "warning");
+            if(!currentXoxoState) return launchToast("Menghubungkan ke server...", "warning");
+            if(currentXoxoState.status !== "lobby") return launchToast("Permainan sedang berjalan!", "warning");
+            
+            const currentPlayers = currentXoxoState.players || [];
             const me = { uid: auth.currentUser.uid, name: currentUserData.nama.split(' ')[0] };
-            if(currentXoxoState.players.find(p => p.uid === me.uid)) return launchToast("Sudah gabung!", "warning");
-            if(currentXoxoState.players.length >= 4) return launchToast("Lobby penuh!", "danger");
-            const newPlayers = [...currentXoxoState.players, me]; await updateDoc(xoxoDocRef, { players: newPlayers });
+            
+            if(currentPlayers.find(p => p.uid === me.uid)) return launchToast("Sudah gabung!", "warning");
+            if(currentPlayers.length >= 4) return launchToast("Lobby penuh!", "danger");
+            
+            const newPlayers = [...currentPlayers, me]; 
+            await updateDoc(xoxoDocRef, { players: newPlayers });
+            launchToast("Berhasil gabung!", "success");
         };
 
         document.getElementById('btn-xoxo-start').onclick = async () => {
+            if(!currentXoxoState) return;
             const size = parseInt(document.getElementById('xoxo-board-size').value);
             const mode = document.getElementById('xoxo-mode-select').value;
             const emptyBoard = Array(size * size).fill("");
@@ -692,7 +829,7 @@
                 renderXoxoUI(); playCuteDing();
             } else {
                 localXoxoGame = false;
-                let p = [...currentXoxoState.players];
+                let p = currentXoxoState.players ? [...currentXoxoState.players] : [];
                 if(p.length < 2) return launchToast("Minimal 2 pemain!", "warning");
                 for (let i = p.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [p[i], p[j]] = [p[j], p[i]]; }
                 
@@ -712,9 +849,10 @@
             
             if(state.status === "lobby") {
                 lobbyScreen.classList.remove('hidden'); matchScreen.classList.add('hidden'); podiumScreen.classList.add('hidden'); 
-                document.getElementById('xoxo-player-count').innerText = state.players.length; 
-                document.getElementById('xoxo-player-list').innerHTML = state.players.map(p => `<span class="player-tag">${p.name}</span>`).join(" "); 
-                document.getElementById('btn-xoxo-start').disabled = (state.players.length < 2 && document.getElementById('xoxo-mode-select').value === 'pvp');
+                const pList = state.players || [];
+                document.getElementById('xoxo-player-count').innerText = pList.length; 
+                document.getElementById('xoxo-player-list').innerHTML = pList.map(p => `<span class="player-tag">${p.name}</span>`).join(" "); 
+                document.getElementById('btn-xoxo-start').disabled = (pList.length < 2 && document.getElementById('xoxo-mode-select').value === 'pvp');
             } else if(state.status === "finished") {
                 lobbyScreen.classList.add('hidden'); matchScreen.classList.add('hidden'); podiumScreen.classList.remove('hidden'); 
                 const w = state.winners; document.getElementById('pod-name-1').innerText = w["1"]?.name || "-"; document.getElementById('pod-name-2').innerText = w["2"]?.name || "-"; document.getElementById('pod-name-3').innerText = w["3"]?.name || "-";
@@ -813,6 +951,20 @@
         }
 
         document.getElementById('btn-xoxo-reset').onclick = resetXoxoDatabase;
+
+        // === ADMIN PANEL ===
+        function listenToAllUsersForAdmin() {
+            onSnapshot(collection(db, "users"), (snapshot) => {
+                const adminListDiv = document.getElementById('admin-all-users-list'); adminListDiv.innerHTML = "";
+                snapshot.forEach((userDoc) => {
+                    const uData = userDoc.data(); const card = document.createElement('div'); card.className = "item-card";
+                    card.innerHTML = `<div style="text-align:left; display:flex; align-items:center; gap:8px;">${renderAvatarHtml(uData.avatar)}<div><b>${uData.nama}</b> <span class="badge ${uData.role}">${uData.role}</span><br><small>@${uData.username} | ${uData.no_telp}</small></div></div><div class="admin-actions">${uData.role !== 'superadmin' ? `<button class="btn-small" style="background:#f59e0b; color:#0f172a;" onclick="adminResetPassword('${uData.uid}', '${uData.nama}')">Reset</button><button class="btn-small" style="background:#ef4444;" onclick="adminDeleteAccount('${uData.uid}', '${uData.nama}')">Hapus</button>` : '<span style="font-size:11px; color:#64748b; font-style:italic;">Main Admin</span>'}</div>`; adminListDiv.appendChild(card);
+                });
+            });
+        }
+        window.adminResetPassword = async function(uid, name) { if(!confirm(`Reset sandi ${name} ke password standar "1234"?`)) return; await updateDoc(doc(db, "users", uid), { password: "1234", needsReset: true }); launchToast(`Password disetel ke '1234'`, "success"); };
+        window.adminDeleteAccount = async function(uid, name) { if(!confirm(`Hapus permanen akun ${name}?`)) return; await deleteDoc(doc(db, "users", uid)); await deleteDoc(doc(db, "locations", uid)); launchToast("Akun terhapus.", "success"); };
+
     </script>
 </body>
 </html>
