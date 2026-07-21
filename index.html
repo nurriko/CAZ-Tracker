@@ -126,7 +126,10 @@
         <div class="form-group"><label>Username (Untuk Login)</label><input type="text" id="reg-username" placeholder="Contoh: budi123"></div>
         <div class="form-group">
             <label>Pilih Avatar Emoji Awal 🦊</label>
-            <select id="reg-avatar"><option value="🐱">🐱 Kucing Oren</option><option value="🐰">🐰 Kelinci Imut</option><option value="🐻">🐻 Beruang Santai</option><option value="🦊">🦊 Rubah Pintar</option><option value="🐼">🐼 Panda Mengantuk</option><option value="🐥">🐥 Anak Ayam Ceria</option></select>
+            <select id="reg-avatar">
+                <option value="🐱">🐱 Kucing Oren</option><option value="🐰">🐰 Kelinci Imut</option><option value="🐻">🐻 Beruang Santai</option>
+                <option value="🦊">🦊 Rubah Pintar</option><option value="🐼">🐼 Panda Mengantuk</option><option value="🐥">🐥 Anak Ayam Ceria</option>
+            </select>
         </div>
         <div class="form-group"><label>No. Telepon / WA</label><input type="tel" id="reg-phone" placeholder="08xxxxxxxxxx"></div>
         <div class="form-group"><label>Email</label><input type="email" id="reg-email" placeholder="email@aktif.com"></div>
@@ -369,8 +372,10 @@
         let activeTabId = "tab-peta"; let myLatestLat = null; let myLatestLng = null; let lastTrackTime = null; let myCustomPlaces = []; let friendLastStatuses = {};
         let localBatteryLevel = 100; let localIsCharging = false; let initialMapFitDone = false;
         
+        // PETA WARNA CERAH DEFAULT
         let isMapDark = false;
 
+        // SOUND SETTINGS
         let isSoundMuted = localStorage.getItem('caz_muted') === 'true';
         const soundBtn = document.getElementById('btn-toggle-sound');
         function updateSoundBtnUI() {
@@ -607,8 +612,9 @@
                             if(statZone) statZone.innerText = newZone;
                             
                             const popupText = `<b>${loc.nama}</b><br>${newZone}<br>🔋 ${loc.battery||0}%`; 
-                            if (!friendMarkers[friend.uid]) { const el = document.createElement('div'); el.className = 'custom-emoji-marker'; el.innerText = "👤"; friendMarkers[friend.uid] = new maplibregl.Marker({element: el}).setLngLat([loc.lng, loc.lat]).addTo(mapData); } 
-                            else { friendMarkers[friend.uid].setLngLat([loc.lng, loc.lat]); }
+                            
+                            // MENGGUNAKAN updateMapMarker DI SINI AGAR AVATAR BENAR
+                            friendMarkers[friend.uid] = updateMapMarker(friendMarkers[friend.uid], loc.lat, loc.lng, loc.avatar, popupText);
                         }
                     });
                 });
@@ -851,7 +857,6 @@
             else { document.getElementById('xoxo-pvp-info').classList.remove('hidden'); document.getElementById('btn-xoxo-join').classList.remove('hidden'); }
         };
 
-        // NEW: Logika Gabung dan Keluar Ruangan XOXO
         document.getElementById('btn-xoxo-join').onclick = async () => {
             if(!currentXoxoState) return launchToast("Menghubungkan ke server...", "warning");
             if(currentXoxoState.status !== "lobby") return launchToast("Permainan sedang berjalan!", "warning");
@@ -1022,6 +1027,19 @@
         }
 
         document.getElementById('btn-xoxo-reset').onclick = resetXoxoDatabase;
+
+        // === ADMIN PANEL ===
+        function listenToAllUsersForAdmin() {
+            onSnapshot(collection(db, "users"), (snapshot) => {
+                const adminListDiv = document.getElementById('admin-all-users-list'); adminListDiv.innerHTML = "";
+                snapshot.forEach((userDoc) => {
+                    const uData = userDoc.data(); const card = document.createElement('div'); card.className = "item-card";
+                    card.innerHTML = `<div style="text-align:left; display:flex; align-items:center; gap:8px;">${renderAvatarHtml(uData.avatar)}<div><b>${uData.nama}</b> <span class="badge ${uData.role}">${uData.role}</span><br><small>@${uData.username} | ${uData.no_telp}</small></div></div><div class="admin-actions">${uData.role !== 'superadmin' ? `<button class="btn-small" style="background:#f59e0b; color:#0f172a;" onclick="adminResetPassword('${uData.uid}', '${uData.nama}')">Reset</button><button class="btn-small" style="background:#ef4444;" onclick="adminDeleteAccount('${uData.uid}', '${uData.nama}')">Hapus</button>` : '<span style="font-size:11px; color:#64748b; font-style:italic;">Main Admin</span>'}</div>`; adminListDiv.appendChild(card);
+                });
+            });
+        }
+        window.adminResetPassword = async function(uid, name) { if(!confirm(`Reset sandi ${name} ke password standar "1234"?`)) return; await updateDoc(doc(db, "users", uid), { password: "1234", needsReset: true }); launchToast(`Password disetel ke '1234'`, "success"); };
+        window.adminDeleteAccount = async function(uid, name) { if(!confirm(`Hapus permanen akun ${name}?`)) return; await deleteDoc(doc(db, "users", uid)); await deleteDoc(doc(db, "locations", uid)); launchToast("Akun terhapus.", "success"); };
 
     </script>
 </body>
