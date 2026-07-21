@@ -50,13 +50,14 @@
         .maplibregl-popup-content { background: rgba(30, 41, 59, 0.95) !important; color: #f1f5f9 !important; border-radius: 14px !important; border: 1px solid rgba(56, 189, 248, 0.4) !important; box-shadow: 0 8px 20px rgba(0,0,0,0.4) !important; font-family: 'Nunito', sans-serif !important; padding: 12px 15px !important; font-size: 13px !important; text-align: center; }
         .maplibregl-popup-anchor-bottom .maplibregl-popup-tip { border-top-color: rgba(30, 41, 59, 0.95) !important; }
 
-        .accordion-header { display: flex; justify-content: space-between; align-items: center; background: rgba(15, 23, 42, 0.5); padding: 14px 16px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; margin-top: 15px; }
+        .accordion-header { display: flex; justify-content: space-between; align-items: center; background: rgba(15, 23, 42, 0.5); padding: 14px 16px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; margin-top: 15px; transition: background 0.2s; }
+        .accordion-header:hover { background: rgba(15, 23, 42, 0.7); }
         .accordion-content { background: rgba(15, 23, 42, 0.3); padding: 15px; border-radius: 0 0 16px 16px; border: 1px solid rgba(255,255,255,0.05); border-top: none; margin-top: -5px; }
 
         .list-container { max-height: 250px; overflow-y: auto; margin-top: 12px; }
         .item-card { background: rgba(15, 23, 42, 0.4); padding: 14px 16px; border-radius: 18px; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center; }
         .badge { padding: 4px 10px; border-radius: 12px; font-size: 11px; color: white; font-weight: 800; text-transform: uppercase; }
-        .badge.Keluarga { background: #6366f1; } .badge.superadmin { background: #eab308; color: #0f172a; }
+        .badge.Keluarga { background: #6366f1; } .badge.Teman { background: #0ea5e9; } .badge.superadmin { background: #eab308; color: #0f172a; }
         
         .online-dot { width: 12px; height: 12px; background: #10b981; border-radius: 50%; border: 2px solid #1e293b; position: absolute; bottom: -2px; right: -2px; }
         .offline-dot { width: 12px; height: 12px; background: #64748b; border-radius: 50%; border: 2px solid #1e293b; position: absolute; bottom: -2px; right: -2px; }
@@ -68,7 +69,7 @@
         .msg.system { background: rgba(16, 185, 129, 0.2); color: #10b981; align-self: center; font-size: 12px; border: 1px solid rgba(16, 185, 129, 0.4); max-width: 90%; text-align: center; }
         
         .quick-status-container { display: flex; gap: 8px; overflow-x: auto; padding: 4px 0 12px 0; margin-bottom: 4px; }
-        .btn-quick-status { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #38bdf8; padding: 6px 12px; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; box-shadow: none; border: none; }
+        .btn-quick-status { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #38bdf8; padding: 6px 12px; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; border: none; }
 
         /* === GAME MENU STYLES === */
         .game-menu-btn { margin-bottom: 15px; padding: 20px; font-size: 18px; border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;}
@@ -125,10 +126,7 @@
         <div class="form-group"><label>Username (Untuk Login)</label><input type="text" id="reg-username" placeholder="Contoh: budi123"></div>
         <div class="form-group">
             <label>Pilih Avatar Emoji Awal 🦊</label>
-            <select id="reg-avatar">
-                <option value="🐱">🐱 Kucing Oren</option><option value="🐰">🐰 Kelinci Imut</option><option value="🐻">🐻 Beruang Santai</option>
-                <option value="🦊">🦊 Rubah Pintar</option><option value="🐼">🐼 Panda Mengantuk</option><option value="🐥">🐥 Anak Ayam Ceria</option>
-            </select>
+            <select id="reg-avatar"><option value="🐱">🐱 Kucing Oren</option><option value="🐰">🐰 Kelinci Imut</option><option value="🐻">🐻 Beruang Santai</option><option value="🦊">🦊 Rubah Pintar</option><option value="🐼">🐼 Panda Mengantuk</option><option value="🐥">🐥 Anak Ayam Ceria</option></select>
         </div>
         <div class="form-group"><label>No. Telepon / WA</label><input type="tel" id="reg-phone" placeholder="08xxxxxxxxxx"></div>
         <div class="form-group"><label>Email</label><input type="email" id="reg-email" placeholder="email@aktif.com"></div>
@@ -162,14 +160,21 @@
 
         <!-- TAB: ANGGOTA -->
         <div id="tab-anggota" class="tab-content">
-            <h4>👥 Daftar Anggota Keluarga</h4>
-            <p style="font-size:13px; color:#94a3b8;">Semua anggota yang memiliki akun secara otomatis tergabung di sini.</p>
+            <h4>Tambah Anggota Baru</h4>
+            <div class="form-group"><input type="text" id="friend-name" placeholder="Nama panggilan"></div>
+            <div class="form-group"><input type="tel" id="friend-phone" placeholder="No. Telepon terdaftar (08xxx)"></div>
+            <div class="form-group"><select id="friend-category"><option value="Keluarga">👪 Keluarga</option><option value="Teman">🎈 Teman</option></select></div>
+            <button id="btn-add-friend" style="border-radius:14px; padding:12px;">Tambahkan Hubungan ➕</button>
+            <h4 style="margin-top:20px;">Daftar Anggota Dipantau</h4>
             <div id="friend-list" class="list-container"></div>
         </div>
 
         <!-- TAB: CHAT -->
         <div id="tab-chat" class="tab-content">
-            <div class="form-group"><select id="chat-select-user"><option value="group_global">Semua Anggota Keluarga</option></select></div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <select id="chat-select-user" style="flex:1; margin-right:10px; padding:10px; border-radius:12px; font-family:'Nunito';"><option value="group_global">Semua Anggota Keluarga</option></select>
+                <button id="btn-clear-chat" class="btn-small" style="background:#ef4444; padding:10px 15px;">Clear 🗑️</button>
+            </div>
             <div id="chat-box"></div>
             <div class="quick-status-container">
                 <button type="button" class="btn-quick-status" onclick="sendQuickStatus('OTW 🚗💨')">OTW 🚗💨</button>
@@ -270,7 +275,7 @@
                     </div>
                     
                     <div id="xoxo-pvp-info" style="background: rgba(0,0,0,0.3); border-radius: 12px; padding: 10px; margin-bottom: 15px;">
-                        <b style="font-size:13px; color:#38bdf8;">Di Ruang Tunggu (<span id="xoxo-player-count">0</span>):</b>
+                        <b style="font-size:13px; color:#38bdf8;">Di Ruang Tunggu:</b>
                         <div id="xoxo-player-list" style="margin-top: 8px; font-size:14px; min-height: 40px;"></div>
                     </div>
 
@@ -336,7 +341,6 @@
         </div>
     </div>
 
-    <!-- SCRIPT FIREBASE & MAPLIBRE -->
     <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -362,7 +366,10 @@
 
         let currentUserData = null; let mapData = null; let myMarker = null; let friendMarkers = {};
         let activeChatFriendId = "group_global"; let unsubscribeChat = null;
-        let activeTabId = "tab-peta"; let myLatestLat = null; let myLatestLng = null; let lastTrackTime = null; let myCustomPlaces = [];
+        let activeTabId = "tab-peta"; let myLatestLat = null; let myLatestLng = null; let lastTrackTime = null; let myCustomPlaces = []; let friendLastStatuses = {};
+        let localBatteryLevel = 100; let localIsCharging = false; let initialMapFitDone = false;
+        
+        // PETA WARNA CERAH DEFAULT
         let isMapDark = false;
 
         // SOUND SETTINGS
@@ -474,12 +481,18 @@
             if (user) {
                 const userDoc = await getDoc(doc(db, "users", user.uid)); if(!userDoc.exists()) { signOut(auth); return; }
                 loginSec.classList.add('hidden'); registerSec.classList.add('hidden'); dashboardSec.classList.remove('hidden'); currentUserData = userDoc.data();
-                document.getElementById('user-display-name').innerText = currentUserData.nama; document.getElementById('my-avatar-display').innerHTML = renderAvatarHtml(currentUserData.avatar); document.getElementById('profile-edit-name').value = currentUserData.nama;
-
-                initMap(); listenToMyCustomPlaces(); startLocationTracking(); listenToFriendsAndMap();
-                loadChatRoom(); listenToLiveChatNotification(); initXoxoTournamentListener(); initTebakGambarListener();
-
-                if ("Notification" in window && Notification.permission !== "granted") { Notification.requestPermission(); }
+                document.getElementById('user-display-name').innerText = currentUserData.nama; document.getElementById('profile-edit-name').value = currentUserData.nama;
+                
+                initMap(); 
+                startLocationTracking(); 
+                listenToMyCustomPlaces();
+                listenToFriendsListAndLocations(); 
+                loadChatRoom(); 
+                listenToLiveChatNotification(); 
+                initXoxoTournamentListener(); 
+                initTebakGambarListener();
+                
+                if ("Notification" in window && Notification.permission !== "granted") Notification.requestPermission();
                 if(currentUserData.role === "superadmin") { document.getElementById('admin-panel-container').classList.remove('hidden'); listenToAllUsersForAdmin(); }
             } else { loginSec.classList.remove('hidden'); dashboardSec.classList.add('hidden'); }
         });
@@ -528,57 +541,98 @@
                     
                     if(!initialMapFitDone) { setTimeout(() => focusMap('all'), 1500); initialMapFitDone = true; }
                     
-                    // Update ke lokasi users asli untuk kompatibilitas lama
-                    await updateDoc(doc(db, "users", auth.currentUser.uid), { lat: lat, lng: lng, battery: localBatteryLevel, charging: localIsCharging, statusZone: zoneStatus, speedText: speedStatusText, last_update: now });
+                    // Update ke database
+                    await updateDoc(doc(db, "locations", auth.currentUser.uid), { nama: currentUserData.nama, avatar: currentUserData.avatar, lat: lat, lng: lng, battery: localBatteryLevel, charging: localIsCharging, statusZone: zoneStatus, speedText: speedStatusText, last_update: now });
                 }, (err) => console.log(err), { enableHighAccuracy: true });
             }
         }
         
-        setInterval(async () => { if (auth.currentUser && myLatestLat && myLatestLng) { let currentZone = "🚀 Di Jalan / Luar"; for(let place of myCustomPlaces) { if(computeDistance(myLatestLat, myLatestLng, place.lat, place.lng) <= 100) { currentZone = `📍 Di ${place.nama_tempat}`; break; } } await updateDoc(doc(db, "users", auth.currentUser.uid), { lat: myLatestLat, lng: myLatestLng, statusZone: currentZone, last_update: Date.now() }); } }, 15000);
+        setInterval(async () => { if (auth.currentUser && myLatestLat && myLatestLng) { let currentZone = "🚀 Di Jalan / Luar"; for(let place of myCustomPlaces) { if(computeDistance(myLatestLat, myLatestLng, place.lat, place.lng) <= 100) { currentZone = `📍 Di ${place.nama_tempat}`; break; } } await updateDoc(doc(db, "locations", auth.currentUser.uid), { lat: myLatestLat, lng: myLatestLng, statusZone: currentZone, last_update: Date.now() }); } }, 15000);
 
-        // KEMBALI MENGGUNAKAN KOLEKSI USERS AGAR SEMUA OTOMATIS MUNCUL TANPA TAMBAH MANUAL
-        function listenToFriendsAndMap() {
-            onSnapshot(collection(db, "users"), (snapshot) => {
+        // FITUR TAMBAH ANGGOTA (DIKEMBALIKAN KE VERSI STABIL SEBELUMNYA)
+        document.getElementById('btn-add-friend').onclick = async () => {
+            const fName = document.getElementById('friend-name').value; const fPhone = document.getElementById('friend-phone').value.trim(); const fCat = document.getElementById('friend-category').value;
+            if(!fName || !fPhone) return launchToast("Lengkapi form penambahan!", "warning");
+            const snap = await getDocs(query(collection(db, "users"), where("no_telp", "==", fPhone)));
+            if(snap.empty) { launchToast("Nomor HP belum terdaftar!", "danger"); } 
+            else { 
+                const foundUser = snap.docs[0].data(); if(foundUser.uid === auth.currentUser.uid) return launchToast("Tidak bisa menambah diri sendiri!", "warning"); 
+                await setDoc(doc(db, "users", auth.currentUser.uid, "contacts", foundUser.uid), { uid: foundUser.uid, nama: fName, no_telp: fPhone, kategori: fCat }); 
+                launchToast(`Terhubung dengan ${fName}! ✨`, "success"); document.getElementById('friend-name').value = ""; document.getElementById('friend-phone').value = ""; 
+            }
+        };
+
+        window.hapusAnggota = async function(uid) {
+            if(confirm("Hapus anggota ini dari pantauan?")) {
+                await deleteDoc(doc(db, "users", auth.currentUser.uid, "contacts", uid));
+                launchToast("Anggota dihapus.", "success");
+            }
+        };
+
+        function listenToFriendsListAndLocations() {
+            onSnapshot(collection(db, "users", auth.currentUser.uid, "contacts"), (snapshot) => {
                 const friendListDiv = document.getElementById('friend-list'); friendListDiv.innerHTML = ""; 
                 const jumperList = document.getElementById('map-jumper-list'); 
-                Array.from(jumperList.children).forEach(child => { if(child.id !== 'jumper-all' && child.id !== 'jumper-me' && child.id !== 'btn-toggle-map') child.remove(); });
-                
+                Array.from(jumperList.children).forEach(child => { 
+                    if(child.id !== 'jumper-all' && child.id !== 'jumper-me' && child.id !== 'btn-toggle-map') child.remove(); 
+                });
+
+                if(snapshot.empty) friendListDiv.innerHTML = "<p style='color:#64748b;text-align:center;font-size:13px;'>Belum ada anggota dipantau.</p>";
+
                 let chatOpt = `<option value="group_global">Semua Anggota Keluarga</option>`;
 
-                snapshot.forEach((docSnap) => {
-                    const friend = docSnap.data();
-                    if (friend.uid === auth.currentUser.uid) return; // Skip diri sendiri
-
-                    const now = Date.now(); const isOnline = (now - (friend.last_update || 0)) < 180000; const dotClass = isOnline ? 'online-dot' : 'offline-dot';
-                    const zone = friend.statusZone || "🚀 Melacak...";
+                snapshot.forEach((contactDoc) => {
+                    const friend = contactDoc.data(); 
                     
-                    // Card List Anggota
                     const card = document.createElement('div'); card.className = "item-card";
-                    card.innerHTML = `<div style="display:flex; align-items:center; gap:10px;"><div id="friend-avatar-card-${friend.uid}"><div style="position:relative; display:inline-block;">${renderAvatarHtml(friend.avatar)}<div class="${dotClass}"></div></div></div><div><b>${friend.nama}</b> <span class="badge Keluarga">Keluarga</span><br><small id="status-zone-${friend.uid}" style="color:#38bdf8;font-weight:700;">${zone}</small></div></div>`; 
+                    card.innerHTML = `<div style="display:flex; align-items:center; gap:10px;"><div id="friend-avatar-card-${friend.uid}"></div><div><b>${friend.nama}</b> <span class="badge ${friend.kategori}">${friend.kategori}</span><br><small id="status-zone-${friend.uid}" style="color:#38bdf8;font-weight:700;">🚀 Melacak...</small></div></div><button class="btn-small" style="background:#ef4444; padding:4px 8px;" onclick="hapusAnggota('${friend.uid}')">Hapus</button>`; 
                     friendListDiv.appendChild(card);
-                    
-                    // Map Jumper Button
-                    const jumperBtn = document.createElement('button'); jumperBtn.className = "user-chip"; jumperBtn.id = `jumper-friend-${friend.uid}`; jumperBtn.onclick = () => focusMap(friend.uid); jumperBtn.innerHTML = `${extractEmoji(friend.avatar)} ${friend.nama.split(' ')[0]}`; 
-                    jumperList.insertBefore(jumperBtn, document.getElementById('btn-toggle-map'));
-                    
-                    chatOpt += `<option value="${friend.uid}">Layar Pribadi: ${friend.nama}</option>`;
 
-                    // Map Marker
-                    if(friend.lat && friend.lng) {
-                        const popupText = `<b>${friend.nama}</b><br>${zone}<br>${friend.speedText || '🛌 Menetap'}<br>🔋 ${friend.battery||0}%`; 
-                        friendMarkers[friend.uid] = updateMapMarker(friendMarkers[friend.uid], friend.lat, friend.lng, friend.avatar, popupText);
-                    }
+                    const jumperBtn = document.createElement('button'); jumperBtn.className = "user-chip"; jumperBtn.id = `jumper-friend-${friend.uid}`; jumperBtn.onclick = () => focusMap(friend.uid); jumperBtn.innerHTML = `👤 ${friend.nama.split(' ')[0]}`; 
+                    jumperList.insertBefore(jumperBtn, document.getElementById('btn-toggle-map'));
+
+                    chatOpt += `<option value="${friend.uid}">Chat: ${friend.nama}</option>`;
+
+                    onSnapshot(doc(db, "locations", friend.uid), (locDoc) => {
+                        if(locDoc.exists()) {
+                            const loc = locDoc.data(); const newZone = loc.statusZone || "🚀 Luar Area"; const oldZone = friendLastStatuses[friend.uid];
+                            if(oldZone && oldZone !== newZone) { launchToast(`📢 ${loc.nama} telah tiba di ${newZone}!`, "success"); playCuteDing(); } 
+                            friendLastStatuses[friend.uid] = newZone;
+                            
+                            const now = Date.now(); const isOnline = (now - loc.last_update) < 180000; const dotClass = isOnline ? 'online-dot' : 'offline-dot';
+                            
+                            const jumperEl = document.getElementById(`jumper-friend-${friend.uid}`);
+                            if(jumperEl) jumperEl.innerHTML = `${extractEmoji(loc.avatar)} ${friend.nama.split(' ')[0]}`; 
+                            
+                            const avaCard = document.getElementById(`friend-avatar-card-${friend.uid}`);
+                            if(avaCard) avaCard.innerHTML = `<div style="position:relative; display:inline-block;">${renderAvatarHtml(loc.avatar)}<div class="${dotClass}"></div></div>`; 
+                            
+                            const statZone = document.getElementById(`status-zone-${friend.uid}`);
+                            if(statZone) statZone.innerText = newZone;
+                            
+                            const popupText = `<b>${loc.nama}</b><br>${newZone}<br>🔋 ${loc.battery||0}%`; 
+                            friendMarkers[friend.uid] = updateMapMarker(friendMarkers[friend.uid], loc.lat, loc.lng, loc.avatar, popupText);
+                        }
+                    });
                 });
                 
-                // Jangan reset chat yang sedang dipilih jika tidak perlu
                 const chatSelect = document.getElementById('chat-select-user');
-                chatSelect.innerHTML = chatOpt;
-                chatSelect.value = activeChatFriendId;
+                if(chatSelect) {
+                    chatSelect.innerHTML = chatOpt; chatSelect.value = activeChatFriendId;
+                }
             });
         }
 
         /* === CHAT SYSTEM === */
         document.getElementById('chat-select-user').onchange = (e) => { activeChatFriendId = e.target.value; loadChatRoom(); };
+
+        document.getElementById('btn-clear-chat').onclick = async () => {
+            if(!confirm("Yakin ingin menghapus seluruh pesan di obrolan ini?")) return;
+            let chatRefCollection = (activeChatFriendId === "group_global") ? collection(db, "chats", "group_global", "messages") : collection(db, "chats", [auth.currentUser.uid, activeChatFriendId].sort().join("_"), "messages");
+            const snap = await getDocs(chatRefCollection);
+            snap.forEach((d) => deleteDoc(d.ref));
+            launchToast("Obrolan dibersihkan!", "success");
+        };
 
         function loadChatRoom() {
             if(unsubscribeChat) unsubscribeChat();
@@ -779,6 +833,7 @@
         /* === GAME 2: XOXO TOURNAMENT / VS KOMPUTER === */
         let localXoxoGame = false; let localXoxoState = null;
         let xoxoDocRef = doc(db, "games", "xoxo_tournament"); 
+        let currentXoxoState = null;
 
         function initXoxoTournamentListener() {
             onSnapshot(xoxoDocRef, (snap) => {
