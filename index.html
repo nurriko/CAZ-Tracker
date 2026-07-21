@@ -69,7 +69,7 @@
         .msg.system { background: rgba(16, 185, 129, 0.2); color: #10b981; align-self: center; font-size: 12px; border: 1px solid rgba(16, 185, 129, 0.4); max-width: 90%; text-align: center; }
         
         .quick-status-container { display: flex; gap: 8px; overflow-x: auto; padding: 4px 0 12px 0; margin-bottom: 4px; }
-        .btn-quick-status { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #38bdf8; padding: 6px 12px; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; border: none; }
+        .btn-quick-status { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #38bdf8; padding: 6px 12px; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; box-shadow: none; border: none; }
 
         /* === GAME MENU STYLES === */
         .game-menu-btn { margin-bottom: 15px; padding: 20px; font-size: 18px; border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;}
@@ -275,7 +275,7 @@
                     </div>
                     
                     <div id="xoxo-pvp-info" style="background: rgba(0,0,0,0.3); border-radius: 12px; padding: 10px; margin-bottom: 15px;">
-                        <b style="font-size:13px; color:#38bdf8;">Di Ruang Tunggu:</b>
+                        <b style="font-size:13px; color:#38bdf8;">Di Ruang Tunggu (<span id="xoxo-player-count">0</span>):</b>
                         <div id="xoxo-player-list" style="margin-top: 8px; font-size:14px; min-height: 40px;"></div>
                     </div>
 
@@ -369,10 +369,8 @@
         let activeTabId = "tab-peta"; let myLatestLat = null; let myLatestLng = null; let lastTrackTime = null; let myCustomPlaces = []; let friendLastStatuses = {};
         let localBatteryLevel = 100; let localIsCharging = false; let initialMapFitDone = false;
         
-        // PETA WARNA CERAH DEFAULT
         let isMapDark = false;
 
-        // SOUND SETTINGS
         let isSoundMuted = localStorage.getItem('caz_muted') === 'true';
         const soundBtn = document.getElementById('btn-toggle-sound');
         function updateSoundBtnUI() {
@@ -504,10 +502,10 @@
                 const file = fileInput.files[0]; const reader = new FileReader(); reader.onload = function(e) {
                     const img = new Image(); img.onload = async function() {
                         const canvas = document.createElement('canvas'); const MAX_SIZE = 150; let w = img.width, h = img.height; if (w > h) { if (w > MAX_SIZE) { h *= MAX_SIZE / w; w = MAX_SIZE; } } else { if (h > MAX_SIZE) { w *= MAX_SIZE / h; h = MAX_SIZE; } } canvas.width = w; canvas.height = h; canvas.getContext('2d').drawImage(img, 0, 0, w, h); const base64Photo = canvas.toDataURL('image/jpeg', 0.8);
-                        await updateDoc(doc(db, "users", auth.currentUser.uid), { nama: nameEdit, avatar: base64Photo }); launchToast("Foto profil diperbarui!", "success"); setTimeout(() => location.reload(), 800);
+                        await updateDoc(doc(db, "users", auth.currentUser.uid), { nama: nameEdit, avatar: base64Photo }); await updateDoc(doc(db, "locations", auth.currentUser.uid), { nama: nameEdit, avatar: base64Photo }); launchToast("Foto profil diperbarui!", "success"); setTimeout(() => location.reload(), 800);
                     }; img.src = e.target.result;
                 }; reader.readAsDataURL(file);
-            } else { await updateDoc(doc(db, "users", auth.currentUser.uid), { nama: nameEdit, avatar: targetAvatar }); launchToast("Nama profil berhasil disimpan!", "success"); setTimeout(() => location.reload(), 800); }
+            } else { await updateDoc(doc(db, "users", auth.currentUser.uid), { nama: nameEdit, avatar: targetAvatar }); await updateDoc(doc(db, "locations", auth.currentUser.uid), { nama: nameEdit, avatar: targetAvatar }); launchToast("Nama profil berhasil disimpan!", "success"); setTimeout(() => location.reload(), 800); }
         };
 
         function listenToMyCustomPlaces() {
@@ -541,7 +539,6 @@
                     
                     if(!initialMapFitDone) { setTimeout(() => focusMap('all'), 1500); initialMapFitDone = true; }
                     
-                    // Update ke database
                     await updateDoc(doc(db, "locations", auth.currentUser.uid), { nama: currentUserData.nama, avatar: currentUserData.avatar, lat: lat, lng: lng, battery: localBatteryLevel, charging: localIsCharging, statusZone: zoneStatus, speedText: speedStatusText, last_update: now });
                 }, (err) => console.log(err), { enableHighAccuracy: true });
             }
@@ -549,7 +546,6 @@
         
         setInterval(async () => { if (auth.currentUser && myLatestLat && myLatestLng) { let currentZone = "🚀 Di Jalan / Luar"; for(let place of myCustomPlaces) { if(computeDistance(myLatestLat, myLatestLng, place.lat, place.lng) <= 100) { currentZone = `📍 Di ${place.nama_tempat}`; break; } } await updateDoc(doc(db, "locations", auth.currentUser.uid), { lat: myLatestLat, lng: myLatestLng, statusZone: currentZone, last_update: Date.now() }); } }, 15000);
 
-        // FITUR TAMBAH ANGGOTA (DIKEMBALIKAN KE VERSI STABIL SEBELUMNYA)
         document.getElementById('btn-add-friend').onclick = async () => {
             const fName = document.getElementById('friend-name').value; const fPhone = document.getElementById('friend-phone').value.trim(); const fCat = document.getElementById('friend-category').value;
             if(!fName || !fPhone) return launchToast("Lengkapi form penambahan!", "warning");
@@ -611,7 +607,8 @@
                             if(statZone) statZone.innerText = newZone;
                             
                             const popupText = `<b>${loc.nama}</b><br>${newZone}<br>🔋 ${loc.battery||0}%`; 
-                            friendMarkers[friend.uid] = updateMapMarker(friendMarkers[friend.uid], loc.lat, loc.lng, loc.avatar, popupText);
+                            if (!friendMarkers[friend.uid]) { const el = document.createElement('div'); el.className = 'custom-emoji-marker'; el.innerText = "👤"; friendMarkers[friend.uid] = new maplibregl.Marker({element: el}).setLngLat([loc.lng, loc.lat]).addTo(mapData); } 
+                            else { friendMarkers[friend.uid].setLngLat([loc.lng, loc.lat]); }
                         }
                     });
                 });
@@ -854,19 +851,27 @@
             else { document.getElementById('xoxo-pvp-info').classList.remove('hidden'); document.getElementById('btn-xoxo-join').classList.remove('hidden'); }
         };
 
+        // NEW: Logika Gabung dan Keluar Ruangan XOXO
         document.getElementById('btn-xoxo-join').onclick = async () => {
             if(!currentXoxoState) return launchToast("Menghubungkan ke server...", "warning");
             if(currentXoxoState.status !== "lobby") return launchToast("Permainan sedang berjalan!", "warning");
             
             const currentPlayers = currentXoxoState.players || [];
-            const me = { uid: auth.currentUser.uid, name: currentUserData.nama.split(' ')[0] };
+            const meIdx = currentPlayers.findIndex(p => p.uid === auth.currentUser.uid);
             
-            if(currentPlayers.find(p => p.uid === me.uid)) return launchToast("Sudah gabung!", "warning");
-            if(currentPlayers.length >= 4) return launchToast("Lobby penuh!", "danger");
-            
-            const newPlayers = [...currentPlayers, me]; 
-            await updateDoc(xoxoDocRef, { players: newPlayers });
-            launchToast("Berhasil gabung!", "success");
+            if (meIdx !== -1) {
+                // KELUAR LOBBY
+                currentPlayers.splice(meIdx, 1);
+                await updateDoc(xoxoDocRef, { players: currentPlayers });
+                launchToast("Keluar dari ruangan.", "success");
+            } else {
+                // GABUNG LOBBY
+                if(currentPlayers.length >= 4) return launchToast("Lobby penuh!", "danger");
+                const me = { uid: auth.currentUser.uid, name: (currentUserData.nama || "Pemain").split(' ')[0] };
+                const newPlayers = [...currentPlayers, me]; 
+                await updateDoc(xoxoDocRef, { players: newPlayers });
+                launchToast("Berhasil gabung!", "success");
+            }
         };
 
         document.getElementById('btn-xoxo-start').onclick = async () => {
@@ -906,6 +911,18 @@
                 const pList = state.players || [];
                 document.getElementById('xoxo-player-count').innerText = pList.length; 
                 document.getElementById('xoxo-player-list').innerHTML = pList.map(p => `<span class="player-tag">${p.name}</span>`).join(" "); 
+                
+                // Toggle Tombol Gabung dan Keluar XOXO
+                const btnJoin = document.getElementById('btn-xoxo-join');
+                const isJoined = pList.find(p => p.uid === auth.currentUser.uid);
+                if(isJoined) {
+                    btnJoin.innerText = "Keluar 🚪";
+                    btnJoin.style.background = "#ef4444";
+                } else {
+                    btnJoin.innerText = "Gabung 🎯";
+                    btnJoin.style.background = "#3b82f6";
+                }
+
                 document.getElementById('btn-xoxo-start').disabled = (pList.length < 2 && document.getElementById('xoxo-mode-select').value === 'pvp');
             } else if(state.status === "finished") {
                 lobbyScreen.classList.add('hidden'); matchScreen.classList.add('hidden'); podiumScreen.classList.remove('hidden'); 
@@ -1005,19 +1022,6 @@
         }
 
         document.getElementById('btn-xoxo-reset').onclick = resetXoxoDatabase;
-
-        // === ADMIN PANEL ===
-        function listenToAllUsersForAdmin() {
-            onSnapshot(collection(db, "users"), (snapshot) => {
-                const adminListDiv = document.getElementById('admin-all-users-list'); adminListDiv.innerHTML = "";
-                snapshot.forEach((userDoc) => {
-                    const uData = userDoc.data(); const card = document.createElement('div'); card.className = "item-card";
-                    card.innerHTML = `<div style="text-align:left; display:flex; align-items:center; gap:8px;">${renderAvatarHtml(uData.avatar)}<div><b>${uData.nama}</b> <span class="badge ${uData.role}">${uData.role}</span><br><small>@${uData.username} | ${uData.no_telp}</small></div></div><div class="admin-actions">${uData.role !== 'superadmin' ? `<button class="btn-small" style="background:#f59e0b; color:#0f172a;" onclick="adminResetPassword('${uData.uid}', '${uData.nama}')">Reset</button><button class="btn-small" style="background:#ef4444;" onclick="adminDeleteAccount('${uData.uid}', '${uData.nama}')">Hapus</button>` : '<span style="font-size:11px; color:#64748b; font-style:italic;">Main Admin</span>'}</div>`; adminListDiv.appendChild(card);
-                });
-            });
-        }
-        window.adminResetPassword = async function(uid, name) { if(!confirm(`Reset sandi ${name} ke password standar "1234"?`)) return; await updateDoc(doc(db, "users", uid), { password: "1234", needsReset: true }); launchToast(`Password disetel ke '1234'`, "success"); };
-        window.adminDeleteAccount = async function(uid, name) { if(!confirm(`Hapus permanen akun ${name}?`)) return; await deleteDoc(doc(db, "users", uid)); await deleteDoc(doc(db, "locations", uid)); launchToast("Akun terhapus.", "success"); };
 
     </script>
 </body>
