@@ -42,11 +42,18 @@
 
         .map-user-selector { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 10px; scrollbar-width: none; }
         .map-user-selector::-webkit-scrollbar { display: none; }
-        .user-chip { background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.1); color: #94a3b8; padding: 8px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; white-space: nowrap; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .user-chip { background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.1); color: #94a3b8; padding: 8px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; white-space: nowrap; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: all 0.2s;}
         .user-chip.active { background: linear-gradient(135deg, #0284c7, #3b82f6); color: #fff; border-color: transparent; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); }
 
         .map-wrapper { position: relative; width: 100%; height: 380px; border-radius: 24px; overflow: hidden; border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
         #map { height: 100%; width: 100%; background: #e5e7eb; transition: background 0.3s; }
+        
+        /* RADAR ANIMATION */
+        .radar-wrapper { position: absolute; inset: 0; z-index: 5; pointer-events: none; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        .radar-circle { width: 300px; height: 300px; border-radius: 50%; border: 2px solid rgba(16,185,129,0.3); box-shadow: 0 0 40px rgba(16,185,129,0.2) inset; position: absolute; }
+        .radar-sweep-2 { position: absolute; width: 300px; height: 300px; border-radius: 50%; background: conic-gradient(from 0deg, transparent 70%, rgba(16,185,129,0.5) 100%); animation: radarSpin 2s linear infinite; }
+        @keyframes radarSpin { 100% { transform: rotate(360deg); } }
+
         .custom-emoji-marker { background: #1e293b; border: 3px solid #38bdf8; border-radius: 50%; width: 46px !important; height: 46px !important; display: flex; justify-content: center; align-items: center; font-size: 24px; box-shadow: 0 6px 20px rgba(0,0,0,0.5); overflow: hidden; cursor: pointer; }
         .custom-emoji-marker img { width: 100%; height: 100%; object-fit: cover; }
         .maplibregl-popup-content { background: rgba(30, 41, 59, 0.95) !important; color: #f1f5f9 !important; border-radius: 14px !important; border: 1px solid rgba(56, 189, 248, 0.4) !important; box-shadow: 0 8px 20px rgba(0,0,0,0.4) !important; font-family: 'Nunito', sans-serif !important; padding: 12px 15px !important; font-size: 13px !important; text-align: center; }
@@ -152,9 +159,18 @@
             <div class="map-user-selector" id="map-jumper-list">
                 <button id="jumper-all" class="user-chip active" onclick="focusMap('all')">🌍 Semua</button>
                 <button id="jumper-me" class="user-chip" onclick="focusMap('me')">👦 Saya</button>
-                <button id="btn-toggle-map" class="user-chip" onclick="toggleMapStyle()" style="margin-left:auto; background: rgba(15, 23, 42, 0.6); color: #94a3b8; border-color: transparent;">🌙 Malam</button>
+                <button id="btn-toggle-radar" class="user-chip" onclick="toggleRadar()" style="margin-left:auto; background: rgba(16,185,129,0.2); color: #10b981; border-color: transparent;">📡 Radar</button>
+                <button id="btn-toggle-map" class="user-chip" onclick="toggleMapStyle()" style="background: rgba(15, 23, 42, 0.6); color: #94a3b8; border-color: transparent;">🌙 Malam</button>
             </div>
-            <div class="map-wrapper"><div id="map"></div></div>
+            
+            <div class="map-wrapper">
+                <div id="radar-ui" class="radar-wrapper hidden">
+                    <div class="radar-circle"></div>
+                    <div class="radar-sweep-2"></div>
+                </div>
+                <div id="map"></div>
+            </div>
+            
             <div class="accordion-header" onclick="toggleGeofenceUI()"><h4 style="margin:0; font-size:15px; color:#38bdf8;">📍 Kelola Tempat Kustom Saya</h4><span id="geofence-icon" style="color:#94a3b8; font-size:12px;">▼ Buka</span></div>
             <div id="geofence-content" class="accordion-content hidden">
                 <div class="form-group" style="margin-bottom:10px;"><label>Nama Tempat Saat Ini</label><input type="text" id="place-custom-name" placeholder="Misal: Rumah, Kantor, Sekolah"></div>
@@ -311,9 +327,11 @@
 
                 <div class="xoxo-wrapper hidden" id="pong-podium-screen" style="border-color:#eab308;">
                     <h3 style="color:#eab308; font-size:22px; margin-bottom:5px;">🏆 PEMENANG TENNIS 🏆</h3>
-                    <div style="font-size:60px; margin:20px 0;">👑</div>
-                    <b style="font-size:20px; color:#fff;" id="pong-winner-name">-</b>
-                    <br>
+                    <div class="podium">
+                        <div class="podium-box podium-2"><div class="podium-avatar" id="pong-ava-2">🥈</div><div style="color:#f1f5f9; font-weight:800;">#2</div><div id="pong-name-2" style="font-size:11px; margin-top:5px;">-</div></div>
+                        <div class="podium-box podium-1"><div class="podium-avatar" id="pong-ava-1">👑</div><div style="color:#eab308; font-weight:900; font-size:20px;">#1</div><div id="pong-name-1" style="font-size:12px; margin-top:5px; font-weight:bold;">-</div></div>
+                        <div class="podium-box podium-3"><div class="podium-avatar" id="pong-ava-3">🥉</div><div style="color:#d97706; font-weight:800;">#3</div><div id="pong-name-3" style="font-size:11px; margin-top:5px;">-</div></div>
+                    </div>
                     <button id="btn-pong-reset" style="margin-top:20px; background:#ef4444; padding:10px; font-size:14px;">Mulai Baru / Kembali ke Lobby 🔄</button>
                 </div>
             </div>
@@ -439,6 +457,7 @@
         let localBatteryLevel = 100; let localIsCharging = false; let initialMapFitDone = false;
         
         let isMapDark = false;
+        let myPreviousZone = undefined;
 
         let isSoundMuted = localStorage.getItem('caz_muted') === 'true';
         const soundBtn = document.getElementById('btn-toggle-sound');
@@ -464,6 +483,13 @@
             if(!mapData) return; isMapDark = !isMapDark;
             mapData.setStyle(isMapDark ? 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json' : 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json');
             const btn = document.getElementById('btn-toggle-map'); btn.innerHTML = isMapDark ? "🌞 Siang" : "🌙 Malam"; btn.style.background = isMapDark ? "rgba(56, 189, 248, 0.2)" : "rgba(15, 23, 42, 0.6)";
+        };
+
+        window.toggleRadar = () => {
+            const r = document.getElementById('radar-ui'); r.classList.toggle('hidden');
+            const b = document.getElementById('btn-toggle-radar');
+            if(r.classList.contains('hidden')) { b.style.background = "rgba(16,185,129,0.2)"; b.style.color = "#10b981"; } 
+            else { b.style.background = "#10b981"; b.style.color = "#fff"; playPokeSound(); }
         };
 
         window.toggleGeofenceUI = function() { const c = document.getElementById('geofence-content'); const i = document.getElementById('geofence-icon'); if(c.classList.contains('hidden')) { c.classList.remove('hidden'); i.innerText = "▲ Tutup"; } else { c.classList.add('hidden'); i.innerText = "▼ Buka"; } };
@@ -551,9 +577,15 @@
                 loginSec.classList.add('hidden'); registerSec.classList.add('hidden'); dashboardSec.classList.remove('hidden'); currentUserData = userDoc.data();
                 document.getElementById('user-display-name').innerText = currentUserData.nama; document.getElementById('profile-edit-name').value = currentUserData.nama;
                 
-                initMap(); startLocationTracking(); listenToMyCustomPlaces(); listenToFriendsListAndLocations(); 
-                loadChatRoom(); listenToLiveChatNotification(); 
-                initTebakGambarListener(); initXoxoTournamentListener(); initPongListener();
+                initMap(); 
+                startLocationTracking(); 
+                listenToMyCustomPlaces();
+                listenToFriendsListAndLocations(); 
+                loadChatRoom(); 
+                listenToLiveChatNotification(); 
+                initTebakGambarListener(); 
+                initXoxoTournamentListener(); 
+                initPongListener();
                 
                 if ("Notification" in window && Notification.permission !== "granted") Notification.requestPermission();
                 if(currentUserData.role === "superadmin") { document.getElementById('admin-panel-container').classList.remove('hidden'); listenToAllUsersForAdmin(); }
@@ -577,10 +609,8 @@
             onSnapshot(collection(db, "users", auth.currentUser.uid, "custom_places"), (snapshot) => {
                 myCustomPlaces = []; const listDiv = document.getElementById('user-custom-places-list'); listDiv.innerHTML = "";
                 snapshot.forEach((pDoc) => { const place = pDoc.data(); myCustomPlaces.push(place); const card = document.createElement('div'); card.className = "item-card"; card.style.padding = "8px 12px"; card.innerHTML = `<div style="font-size:13px;">📍 <b>${place.nama_tempat}</b> <br><small style="color:#64748b;">${place.lat.toFixed(4)}, ${place.lng.toFixed(4)}</small></div><button class="btn-small" style="background:#ef4444; padding:4px 8px;" onclick="deleteCustomPlace('${place.placeId}')">Hapus 🗑️</button>`; listDiv.appendChild(card); });
-                updateMyWeeklyTitle(snapshot.size);
             });
         }
-        function updateMyWeeklyTitle(placesCount) { let title = "Si Paling Mager 🦥"; if (placesCount >= 3) { title = "Si Tukang Keluyuran 🦅"; } else if (localBatteryLevel < 30) { title = "Si Krisis Energi 🪫"; } document.getElementById('my-badge-title').innerText = title; }
         
         document.getElementById('btn-save-custom-place').onclick = async () => { const nameInput = document.getElementById('place-custom-name').value.trim(); if(!nameInput) return launchToast("Masukkan nama tempat kustom!", "warning"); if(!myLatestLat || !myLatestLng) return launchToast("Sinyal GPS belum mengunci koordinat!", "danger"); const placeId = "place_" + Date.now(); await setDoc(doc(db, "users", auth.currentUser.uid, "custom_places", placeId), { placeId: placeId, nama_tempat: nameInput, lat: myLatestLat, lng: myLatestLng }); launchToast(`Sukses mendaftarkan area ${nameInput}!`, "success"); document.getElementById('place-custom-name').value = ""; };
         window.deleteCustomPlace = async function(placeId) { if(!confirm("Hapus lokasi geofence kustom ini?")) return; await deleteDoc(doc(db, "users", auth.currentUser.uid, "custom_places", placeId)); launchToast("Lokasi dihapus.", "success"); };
@@ -597,11 +627,21 @@
                     const lat = pos.coords.latitude; const lng = pos.coords.longitude; const now = Date.now(); let computedSpeedMps = pos.coords.speed;
                     if (computedSpeedMps === null || computedSpeedMps === undefined) { if (myLatestLat && myLatestLng && lastTrackTime) { const distMeters = computeDistance(myLatestLat, myLatestLng, lat, lng); const timeSecs = (now - lastTrackTime) / 1000; if (timeSecs > 0) computedSpeedMps = distMeters / timeSecs; } }
                     myLatestLat = lat; myLatestLng = lng; lastTrackTime = now; const speedStatusText = getSpeedEmoji(computedSpeedMps);
-                    let zoneStatus = "🚀 Di Jalan / Luar"; for(let place of myCustomPlaces) { if(computeDistance(lat, lng, place.lat, place.lng) <= 100) { zoneStatus = `📍 Di ${place.nama_tempat}`; break; } }
+                    
+                    let zoneStatus = "🚀 Di Jalan / Luar"; 
+                    for(let place of myCustomPlaces) { 
+                        if(computeDistance(lat, lng, place.lat, place.lng) <= 100) { zoneStatus = `📍 Di ${place.nama_tempat}`; break; } 
+                    }
+                    
+                    if(myPreviousZone !== undefined && myPreviousZone !== zoneStatus && zoneStatus !== "🚀 Di Jalan / Luar") {
+                        const pName = zoneStatus.replace('📍 Di ', '');
+                        addDoc(collection(db, "chats", "group_global", "messages"), { senderId: "system", text: `🎯 AUTO-CHECK-IN: ${currentUserData.nama} baru saja tiba di area ${pName}!`, timestamp: Date.now() });
+                    }
+                    myPreviousZone = zoneStatus;
+
                     const batteryString = `🔋 ${localBatteryLevel}% ${localIsCharging ? '⚡' : ''}`; const popupText = `<b>Saya (${currentUserData.nama})</b><br>${zoneStatus}<br>${speedStatusText}<br>${batteryString}`;
                     
                     myMarker = updateMapMarker(myMarker, lat, lng, currentUserData.avatar, popupText);
-                    
                     if(!initialMapFitDone) { setTimeout(() => focusMap('all'), 1500); initialMapFitDone = true; }
                     
                     await updateDoc(doc(db, "locations", auth.currentUser.uid), { nama: currentUserData.nama, avatar: currentUserData.avatar, lat: lat, lng: lng, battery: localBatteryLevel, charging: localIsCharging, statusZone: zoneStatus, speedText: speedStatusText, last_update: now });
@@ -633,7 +673,7 @@
             onSnapshot(collection(db, "users", auth.currentUser.uid, "contacts"), (snapshot) => {
                 const friendListDiv = document.getElementById('friend-list'); friendListDiv.innerHTML = ""; 
                 const jumperList = document.getElementById('map-jumper-list'); 
-                Array.from(jumperList.children).forEach(child => { if(child.id !== 'jumper-all' && child.id !== 'jumper-me' && child.id !== 'btn-toggle-map') child.remove(); });
+                Array.from(jumperList.children).forEach(child => { if(child.id !== 'jumper-all' && child.id !== 'jumper-me' && child.id !== 'btn-toggle-map' && child.id !== 'btn-toggle-radar') child.remove(); });
 
                 if(snapshot.empty) friendListDiv.innerHTML = "<p style='color:#64748b;text-align:center;font-size:13px;'>Belum ada anggota dipantau.</p>";
                 let chatOpt = `<option value="group_global">Semua Anggota Keluarga</option>`;
@@ -645,7 +685,7 @@
                     friendListDiv.appendChild(card);
 
                     const jumperBtn = document.createElement('button'); jumperBtn.className = "user-chip"; jumperBtn.id = `jumper-friend-${friend.uid}`; jumperBtn.onclick = () => focusMap(friend.uid); jumperBtn.innerHTML = `👤 ${friend.nama.split(' ')[0]}`; 
-                    jumperList.insertBefore(jumperBtn, document.getElementById('btn-toggle-map'));
+                    jumperList.insertBefore(jumperBtn, document.getElementById('btn-toggle-radar'));
 
                     chatOpt += `<option value="${friend.uid}">Chat: ${friend.nama}</option>`;
 
@@ -664,7 +704,19 @@
                             const statZone = document.getElementById(`status-zone-${friend.uid}`);
                             if(statZone) statZone.innerText = newZone;
                             
-                            const popupText = `<b>${loc.nama}</b><br>${newZone}<br>🔋 ${loc.battery||0}%`; 
+                            let distText = "Menghitung...";
+                            if (myLatestLat && myLatestLng) {
+                                let d = computeDistance(myLatestLat, myLatestLng, loc.lat, loc.lng);
+                                distText = d < 1000 ? `${Math.round(d)} Meter` : `${(d/1000).toFixed(1)} KM`;
+                            }
+
+                            // NEW: Status Waktu dan Tombol Navigasi Google Maps
+                            let timeStr = new Date(loc.last_update).toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'});
+                            let statusStr = isOnline ? `<span style="color:#10b981;">🟢 Aktif</span>` : `<span style="color:#ef4444;">🔴 Terakhir: ${timeStr}</span>`;
+
+                            const popupText = `<b>${loc.nama}</b><br>${statusStr}<br>${newZone}<br>Jarak: <b>${distText}</b><br>🔋 ${loc.battery||0}%<br>
+                            <a href="https://www.google.com/maps/dir/?api=1&destination=${loc.lat},${loc.lng}" target="_blank" style="display:block; margin-top:8px; background:linear-gradient(135deg, #0284c7, #3b82f6); color:white; padding:8px; border-radius:10px; text-decoration:none; font-weight:bold; font-size:12px; box-shadow:0 4px 10px rgba(59,130,246,0.4);">🛣️ Petunjuk Arah</a>`; 
+                            
                             friendMarkers[friend.uid] = updateMapMarker(friendMarkers[friend.uid], loc.lat, loc.lng, loc.avatar, popupText);
                         }
                     });
@@ -716,7 +768,7 @@
             document.getElementById('chat-input').value = "";
         }
         document.getElementById('btn-send-chat').onclick = () => { processAndSendMessage(document.getElementById('chat-input').value); };
-        window.sendQuickStatus = (statusText) => { processAndSendMessage(statusText); };
+        window.sendQuickStatus = function(statusText) { processAndSendMessage(statusText); };
 
         function listenToLiveChatNotification() {
             let lastTimestamp = Date.now();
@@ -810,19 +862,10 @@
             onSnapshot(xoxoDocRef, (snap) => { if(localXoxoGame) return; if(!snap.exists()) { resetXoxoDatabase(); return; } currentXoxoState = snap.data(); renderXoxoUI(); });
         }
         async function resetXoxoDatabase() {
-            localXoxoGame = false;
-            await setDoc(xoxoDocRef, { status: "lobby", size: 4, players: [], matches: { final: { p1: null, p2: null, board: [], turn: null, winner: null, active: false }, match1: { p1: null, p2: null, board: [], turn: null, winner: null, active: false }, match2: { p1: null, p2: null, board: [], turn: null, winner: null, active: false }, bronze: { p1: null, p2: null, board: [], turn: null, winner: null, active: false } }, winners: { 1: null, 2: null, 3: null } });
-            renderXoxoUI();
+            await setDoc(xoxoDocRef, { status: "lobby", size: 4, players: [], matches: { final: { p1: null, p2: null, board: [], turn: null, winner: null, active: false }, match1: { p1: null, p2: null, board: [], turn: null, winner: null, active: false }, match2: { p1: null, p2: null, board: [], turn: null, winner: null, active: false }, bronze: { p1: null, p2: null, board: [], turn: null, winner: null, active: false } }, winners: { 1: null, 2: null, 3: null } }); localXoxoGame = false;
         }
         document.getElementById('xoxo-mode-select').onchange = (e) => {
-            const m = e.target.value;
-            if(m !== 'pvp') { 
-                document.getElementById('xoxo-pvp-info').classList.add('hidden'); document.getElementById('btn-xoxo-join').classList.add('hidden'); 
-                document.getElementById('btn-xoxo-start').disabled = false; 
-            } else { 
-                document.getElementById('xoxo-pvp-info').classList.remove('hidden'); document.getElementById('btn-xoxo-join').classList.remove('hidden'); 
-                renderXoxoUI(); 
-            }
+            const m = e.target.value; document.getElementById('xoxo-pvp-info').classList.toggle('hidden', m !== 'pvp'); document.getElementById('btn-xoxo-join').classList.toggle('hidden', m !== 'pvp');
         };
         document.getElementById('btn-xoxo-join').onclick = async () => {
             if(!currentXoxoState || currentXoxoState.status !== "lobby") return;
@@ -835,9 +878,9 @@
             const size = parseInt(document.getElementById('xoxo-board-size').value); const mode = document.getElementById('xoxo-mode-select').value; const empty = Array(size * size).fill("");
             if(mode !== 'pvp') {
                 localXoxoGame = true; const me = { uid: auth.currentUser.uid, name: currentUserData.nama.split(' ')[0] }; const ai = { uid: mode, name: "Komputer" };
-                localXoxoState = { status: "final", size: size, matches: { final: { p1: me, p2: ai, board: empty, turn: me.uid, winner: null, active: true } }, winners: {1:null, 2:null, 3:null} }; renderXoxoUI(); playCuteDing();
+                localXoxoState = { status: "final", size: size, matches: { final: { p1: me, p2: ai, board: empty, turn: me.uid, winner: null, active: true } }, winners: {1:null, 2:null} }; renderXoxoUI(); playCuteDing();
             } else {
-                localXoxoGame = false; let p = currentXoxoState.players ? [...currentXoxoState.players] : []; if(p.length < 2) return launchToast("Butuh 2 pemain!", "warning");
+                localXoxoGame = false; let p = currentXoxoState.players ? [...currentXoxoState.players] : []; if(p.length < 2) return;
                 for (let i = p.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [p[i], p[j]] = [p[j], p[i]]; }
                 if(p.length === 2) { await updateDoc(xoxoDocRef, { status: "final", size: size, players: p, "matches.final": { p1: p[0], p2: p[1], board: empty, turn: p[0].uid, winner: null, active: true } }); } 
                 else { await updateDoc(xoxoDocRef, { status: "match1", size: size, players: p, "matches.match1": { p1: p[0], p2: p[1], board: empty, turn: p[0].uid, winner: null, active: true }, "matches.match2": { p1: p[2], p2: p[3]||{uid:'bot', name:'BOT'}, board: empty, turn: p[2].uid, winner: null, active: false } }); } playCuteDing();
@@ -948,7 +991,6 @@
             await setDoc(pongDocRef, initData); renderPongUI();
         }
 
-        // Sinkronisasi setting untuk semua pemain di lobby
         document.getElementById('pong-setting-players').onchange = (e) => { if(currentPongState && currentPongState.host === auth.currentUser.uid) { updateDoc(pongDocRef, { maxP: parseInt(e.target.value) }); } };
         document.getElementById('pong-setting-time').onchange = (e) => { if(currentPongState && currentPongState.host === auth.currentUser.uid) { updateDoc(pongDocRef, { timeLimit: parseInt(e.target.value) }); } };
 
@@ -958,7 +1000,7 @@
                 document.getElementById('pong-setting-players').value = "2"; 
                 document.getElementById('pong-setting-players').disabled = true;
                 document.getElementById('btn-pong-join').classList.add('hidden'); 
-                document.getElementById('btn-pong-start').disabled = false; // Buka kunci tombol untuk mode AI
+                document.getElementById('btn-pong-start').disabled = false; 
             } else { 
                 document.getElementById('pong-setting-players').disabled = false;
                 document.getElementById('btn-pong-join').classList.remove('hidden'); 
